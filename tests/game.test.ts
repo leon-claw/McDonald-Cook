@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { COOK_DURATION, COLLECTION_COOLDOWN, RECIPES, resolveRecipe } from '../src/game/data';
+import { COOK_DURATION, COLLECTION_COOLDOWN, INGREDIENTS, resolveRecipe } from '../src/game/data';
 import type { IngredientId } from '../src/game/data';
 import { createGameStore, SAVE_KEY } from '../src/game/store';
 
@@ -28,17 +28,31 @@ function cook(store: ReturnType<typeof createGameStore>, ingredients: Ingredient
   store.getState().interact();
 }
 
-test('recipes ignore ingredient order but preserve duplicates and reject incompatible additions', () => {
-  assert.equal(resolveRecipe(['bread', 'beef', 'cheese']).id, resolveRecipe(['cheese', 'beef', 'bread']).id);
-  assert.equal(resolveRecipe(['bread', 'beef', 'beef', 'cheese']).id, 'double-beef');
-  assert.equal(resolveRecipe(['bread', 'beef', 'cheese', 'fish']).quality, 'failure');
-  assert.equal(resolveRecipe(['bread', 'beef', 'cheese', 'tomato']).id, 'golden-cheese');
-  assert.deepEqual(resolveRecipe(['tomato', 'cheese', 'bread', 'beef']).ingredients, ['tomato', 'cheese', 'bread', 'beef']);
-  assert.equal(resolveRecipe(['cheese', 'cheese', 'cheese']).id, 'cheese-cloud');
-  assert.equal(resolveRecipe(['chili', 'chili', 'fish']).id, 'blazing-mystery');
-  assert.equal(resolveRecipe(['fish']).id, 'dubious-stew');
-  assert.ok(RECIPES.filter((recipe) => recipe.quality === 'success').length >= 6);
-  assert.ok(RECIPES.filter((recipe) => recipe.quality === 'failure').length >= 3);
+test('every valid selection produces a Big Mac while retaining the actual ingredients', () => {
+  const combinations: IngredientId[][] = [
+    ...INGREDIENTS.map(({ id }) => [id]),
+    ['bread', 'beef', 'cheese'], ['cheese', 'beef', 'bread'],
+    ['bread', 'beef', 'beef', 'cheese'], ['bread', 'beef', 'cheese', 'fish'],
+    ['cheese', 'cheese', 'cheese'], ['chili', 'chili', 'fish'],
+    ['fish', 'beef', 'tomato'], ['fries', 'chili'],
+    ['fish', 'cheese', 'cheese', 'cheese', 'cheese'],
+  ];
+  for (const ingredients of combinations) {
+    const result = resolveRecipe(ingredients);
+    assert.equal(result.id, 'big-mac');
+    assert.equal(result.name, '巨无霸');
+    assert.equal(result.kind, 'burger');
+    assert.equal(result.quality, 'success');
+    assert.equal(result.catalogTag, 'big-mac');
+    assert.deepEqual(result.ingredients, ingredients);
+    assert.notEqual(result.ingredients, ingredients);
+  }
+});
+
+test('invalid selections cannot resolve to a cooked burger', () => {
+  for (const ingredients of [[], Array(6).fill('bread'), ['unknown']] as IngredientId[][]) {
+    assert.throws(() => resolveRecipe(ingredients), RangeError);
+  }
 });
 
 test('holding reserves owned inventory, caps at five, and never consumes it before cooking', () => {
@@ -89,9 +103,9 @@ test('cooking requires held ingredients at the pot, consumes once, and reveals o
   store.getState().finishCooking();
   store.getState().finishCooking();
   assert.equal(store.getState().phase, 'result');
-  assert.equal(store.getState().result?.id, 'golden-cheese');
+  assert.equal(store.getState().result?.id, 'big-mac');
   assert.equal(store.getState().totalCooked, 1);
-  assert.equal(store.getState().discoveries['golden-cheese']?.count, 1);
+  assert.equal(store.getState().discoveries['big-mac']?.count, 1);
   assert.equal(store.getState().isNewRecipe, true);
   assert.equal(sounds.filter((name) => name === 'discovery').length, 1);
 });
@@ -111,7 +125,7 @@ test('collection cooldown prevents held interaction from duplicating a spawn and
   assert.equal(store.getState().inventory.fish, 4);
 });
 
-test('voices follow held food and result cues distinguish discovery, repeat, and failure', () => {
+test('voices follow held food and every combination plays discovery or success', () => {
   const { store, sounds, advance, stopCount } = setup();
   store.getState().startGame();
   store.getState().openPanel('inventory');
@@ -136,7 +150,9 @@ test('voices follow held food and result cues distinguish discovery, repeat, and
   cook(store, ['fish']);
   advance(COOK_DURATION * 1000);
   store.getState().finishCooking();
-  assert.equal(sounds.at(-1), 'failure');
+  assert.equal(sounds.at(-1), 'success');
+  assert.equal(sounds.includes('failure'), false);
+  assert.equal(store.getState().result?.name, '巨无霸');
 });
 
 test('muted play still completes cooking and emits no cues until sound is enabled', () => {
@@ -166,7 +182,7 @@ test('completed progress survives reload and an interrupted animation does not l
   assert.equal(restored.getState().phase, 'title');
   assert.equal(restored.getState().inventory.bread, 1);
   assert.equal(restored.getState().totalCooked, 1);
-  assert.equal(restored.getState().discoveries['golden-cheese']?.count, 1);
+  assert.equal(restored.getState().discoveries['big-mac']?.count, 1);
   assert.deepEqual(restored.getState().held, []);
 
   store.getState().dismissResult();
@@ -174,13 +190,37 @@ test('completed progress survives reload and an interrupted animation does not l
   advance(COOK_DURATION * 1000);
   store.getState().finishCooking();
   assert.equal(store.getState().isNewRecipe, false);
-  assert.equal(store.getState().discoveries['golden-cheese']?.count, 2);
+  assert.equal(store.getState().discoveries['big-mac']?.count, 2);
   assert.equal(store.getState().totalCooked, 2);
+});
+
+test('legacy recipes merge into the burger journal without losing inventory or completed counts', () => {
+  const legacy = {
+    version: 1, inventory: { bread: 5, beef: 2, cheese: 3, fish: 1 }, totalCooked: 6, soundEnabled: false,
+    discoveries: {
+      'golden-cheese': { at: '2026-10-24T10:00:00Z', ingredients: ['bread', 'beef', 'cheese'], count: 2 },
+      'dubious-stew': { at: '2026-10-24T09:00:00Z', ingredients: ['fish'], count: 3 },
+      'big-mac': { at: '2026-10-24T11:00:00Z', ingredients: ['cheese'], count: 1 },
+    },
+  };
+  const { store, options } = setup(JSON.stringify(legacy));
+  assert.equal(store.getState().inventory.bread, 5);
+  assert.equal(store.getState().inventory.fish, 1);
+  assert.equal(store.getState().soundEnabled, false);
+  assert.equal(store.getState().totalCooked, 6);
+  assert.deepEqual(store.getState().discoveries, {
+    'big-mac': { at: '2026-10-24T09:00:00Z', ingredients: ['fish'], count: 6 },
+  });
+  store.getState().setSoundEnabled(true);
+  const restored = createGameStore(options);
+  assert.equal(restored.getState().totalCooked, 6);
+  assert.equal(restored.getState().discoveries['big-mac'].count, 6);
+  assert.equal(restored.getState().inventory.cheese, 3);
 });
 
 test('invalid or tampered storage is bounded and discarded without breaking startup', () => {
   assert.equal(setup('{broken-json').store.getState().inventory.bread, 2);
-  const saved = { version: 1, inventory: { bread: -12, cheese: 99999999, beef: 'Infinity', fish: 1.7 }, discoveries: { 'golden-cheese': { at: 'bad-date', ingredients: ['bread', 'beef', 'cheese'], count: 5 }, 'unknown-recipe': { at: '2026-10-24', ingredients: ['fish'], count: 2 } }, totalCooked: 1000, soundEnabled: false };
+  const saved = { version: 1, inventory: { bread: -12, cheese: 99999999, beef: 'Infinity', fish: 1.7 }, discoveries: { 'big-mac': { at: 'bad-date', ingredients: ['bread', 'beef', 'cheese'], count: 5 }, 'unknown-recipe': { at: '2026-10-24', ingredients: ['fish'], count: 2 } }, totalCooked: 1000, soundEnabled: false };
   const { store } = setup(JSON.stringify(saved));
   assert.equal(store.getState().inventory.bread, 0);
   assert.equal(store.getState().inventory.cheese, 999);

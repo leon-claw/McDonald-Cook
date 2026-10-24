@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { COOK_DURATION, COLLECTION_COOLDOWN, INGREDIENTS, INGREDIENT_BY_ID, MAX_HELD, RECIPES, isIngredientId, resolveRecipe } from './data';
+import { COOK_DURATION, COLLECTION_COOLDOWN, INGREDIENTS, INGREDIENT_BY_ID, LEGACY_RECIPE_IDS, MAX_HELD, RECIPES, isIngredientId, resolveRecipe } from './data';
 import type { IngredientId, Recipe } from './data';
 import { initAudio, playSound, setAudioEnabled, stopAllSounds } from './audio';
 import type { SoundName } from './audio';
@@ -77,13 +77,17 @@ function loadProgress(storage: StorageLike | null) {
     const inventory = Object.fromEntries(INGREDIENTS.map(({ id }) => [id, boundedCount(savedInventory[id])])) as Inventory;
     const discoveries: Record<string, Discovery> = {};
     if (object(parsed.discoveries)) {
-      for (const recipe of RECIPES) {
-        const value = parsed.discoveries[recipe.id];
+      for (const id of [...RECIPES.map(recipe => recipe.id), ...LEGACY_RECIPE_IDS]) {
+        const value: unknown = parsed.discoveries[id];
         if (!object(value) || typeof value.at !== 'string' || !Number.isFinite(Date.parse(value.at))) continue;
         if (!Array.isArray(value.ingredients) || value.ingredients.length < 1 || value.ingredients.length > MAX_HELD || !value.ingredients.every(isIngredientId)) continue;
         const count = boundedCount(value.count, 1_000_000);
-        if (count < 1 || resolveRecipe(value.ingredients).id !== recipe.id) continue;
-        discoveries[recipe.id] = { at: value.at, ingredients: [...value.ingredients], count };
+        if (count < 1) continue;
+        const discovery: Discovery = { at: value.at, ingredients: [...value.ingredients], count };
+        const recipeId = resolveRecipe(value.ingredients).id;
+        const previous = discoveries[recipeId];
+        const earliest = previous && Date.parse(previous.at) <= Date.parse(discovery.at) ? previous : discovery;
+        discoveries[recipeId] = { at: earliest.at, ingredients: [...earliest.ingredients], count: (previous?.count ?? 0) + count };
       }
     }
     return {

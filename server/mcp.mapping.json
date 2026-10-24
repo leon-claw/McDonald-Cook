@@ -21,6 +21,7 @@
     "orderIdPath": "data.orderId", "payUrlPath": "data.payH5Url"
   },
   "catalogTags": {
+    "巨无霸": "big-mac",
     "511782": "cheeseburger", "1120": "double-beef", "1406": "chicken", "1600": "fish", "1440": "spicy-chicken", "4810": "fries"
   }
 }

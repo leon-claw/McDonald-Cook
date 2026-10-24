@@ -86,7 +86,7 @@ function Scene({onNear}:{onNear:(near:Nearby)=>void}){
       vectors.position.set(3.9-t*.065,2.65,-.35-t*.035);vectors.target.set(-.25,t>4.2?1.65:1.18,-3.85);fov=mobile?54:43;
       if(t>=COOK_DURATION)state.finishCooking();
     }else if(state.phase==='result'){
-      vectors.position.set(mobile?3.6:4.2,mobile?3.2:2.8,.1);vectors.target.set(mobile?0:1.25,mobile?.9:1.65,-3.8);fov=mobile?52:42;
+      vectors.position.set(mobile?3.6:4.2,mobile?3.2:2.8,.1);vectors.target.set(mobile?0:1.25,mobile?1.12:1.65,-3.8);fov=mobile?52:42;
     }else if(state.panel==='inventory'){
       vectors.position.set(m.x+1.3,py+1.75,m.z+3.2);vectors.target.set(m.x-(mobile?.25:1.0),py+.95,m.z);fov=mobile?48:39;m.yaw=.32;
     }else{

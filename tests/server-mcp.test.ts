@@ -124,3 +124,23 @@ test('pricing cannot silently substitute a different product', async t => {
   await adapter.stores('测试城市', '测试地标');
   await assert.rejects(adapter.quote('1120', 'store-one'), /不一致/);
 });
+
+test('Big Mac catalog mapping matches its exact name without substituting another burger or a meal', async t => {
+  const { adapter, calls } = mockMcp({ 'query-meals': { data: {
+    categories: [{ meals: [{ code: 'big-mac-fixture' }, { code: '1120' }, { code: 'meal-fixture' }] }],
+    meals: {
+      'big-mac-fixture': { name: '巨无霸', currentPrice: '26' },
+      '1120': { name: '双层吉士汉堡', currentPrice: '23' },
+      'meal-fixture': { name: '巨无霸套餐', currentPrice: '40' },
+    },
+  } } });
+  t.after(() => adapter.close());
+  await adapter.stores('测试城市', '测试地标');
+  const catalog = await adapter.catalog('store-one');
+  assert.deepEqual(catalog.products.filter(product => product.catalogTag === 'big-mac'), [
+    { id: 'big-mac-fixture', name: '巨无霸', price: 26, catalogTag: 'big-mac' },
+  ]);
+  assert.equal(catalog.products.find(product => product.id === '1120')?.catalogTag, 'double-beef');
+  assert.equal(catalog.products.some(product => product.id === 'meal-fixture'), false);
+  assert.equal(calls.some(call => call.name === 'create-order'), false);
+});

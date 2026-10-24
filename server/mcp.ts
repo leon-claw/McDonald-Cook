@@ -16,7 +16,7 @@ interface Mapping {
   createOrder: Binding & { orderIdPath: string; payUrlPath: string };
   catalogTags: Record<string, string>;
 }
-const allowedTags = new Set(['cheeseburger', 'double-beef', 'chicken', 'fish', 'spicy-chicken', 'fries', 'beef']);
+const allowedTags = new Set(['big-mac', 'cheeseburger', 'double-beef', 'chicken', 'fish', 'spicy-chicken', 'fries', 'beef']);
 
 export function atPath(value: unknown, path: string): unknown {
   if (!path) return value;

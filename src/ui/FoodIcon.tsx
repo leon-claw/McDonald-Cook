@@ -22,32 +22,29 @@ export function FoodIcon({ id, size = 96 }: { id: IngredientId; size?: number })
   );
 }
 
-export function DishIcon({ recipe, size = 260 }: { recipe: Recipe; size?: number }) {
+/** The journal shows the same three-bun, two-patty burger as the cooking reveal. */
+export function DishIcon({ size = 260 }: { recipe: Recipe; size?: number }) {
   const uid = useId().replaceAll(':', '');
-  const beefCount = recipe.ingredients.filter(id => id === 'beef').length;
-  const fish = recipe.ingredients.includes('fish');
-  const chicken = recipe.ingredients.includes('chicken');
-  const double = beefCount > 1;
   return (
     <svg width={size} height={size * .8} viewBox="0 0 300 240" fill="none" aria-hidden="true" className="dish-icon">
-      <defs><linearGradient id={`bun-${uid}`} x1="113" y1="54" x2="173" y2="127" gradientUnits="userSpaceOnUse"><stop stopColor="#ffe3a0"/><stop offset="1" stopColor="#d9984f"/></linearGradient><linearGradient id={`base-${uid}`} x1="150" y1="172" x2="150" y2="208" gradientUnits="userSpaceOnUse"><stop stopColor="#f1c478"/><stop offset="1" stopColor="#c58b47"/></linearGradient></defs>
+      <defs><linearGradient id={`bun-${uid}`} x1="113" y1="42" x2="173" y2="110" gradientUnits="userSpaceOnUse"><stop stopColor="#ffe3a0"/><stop offset="1" stopColor="#d9984f"/></linearGradient><linearGradient id={`base-${uid}`} x1="150" y1="172" x2="150" y2="208" gradientUnits="userSpaceOnUse"><stop stopColor="#f1c478"/><stop offset="1" stopColor="#c58b47"/></linearGradient></defs>
       <ellipse cx="150" cy="216" rx="109" ry="12" fill="#18382c" opacity=".13"/>
       <path d="M32 199c32 20 205 20 236 0l-9 13c-38 20-180 20-218 0Z" fill="#dbd8bd"/>
       <ellipse cx="150" cy="198" rx="118" ry="17" fill="#fff5d5" stroke="#dfd4b5" strokeWidth="2"/>
-      {recipe.kind === 'burger' && <g strokeLinejoin="round" strokeLinecap="round">
+      <g strokeLinejoin="round" strokeLinecap="round">
         <path d="M56 173h188l-8 23c-11 22-163 21-175 1Z" fill={`url(#base-${uid})`} stroke="#b28143" strokeWidth="3"/>
         <path d="M54 169c14-10 21 9 34 2 18-12 26 7 41 0 14-10 21 10 39 0 16-10 25 7 38 0 15-8 25-3 39 3l-8 14c-15 10-22-7-38 1-16 8-25-7-40 1-17 10-22-7-37 0-18 9-25-8-40 1-13 8-22-3-28-9Z" fill="#81a953" stroke="#5c7f3f" strokeWidth="3"/>
-        <path d="M55 143c13-15 175-15 190 0v21c-17 23-170 25-190 0Z" fill={fish || chicken ? '#ce974a' : '#754632'} stroke={fish || chicken ? '#a77b38' : '#573927'} strokeWidth="3"/>
-        <path d="m70 152 9 5m17-9 9 4m20 6 9 3m24-9 11 4m27-7 9 4m14 4 9-4" stroke={fish || chicken ? '#edbd65' : '#a0734b'} strokeWidth="4"/>
-        <path d="m52 140 47 5 27 23 27-22 57 7 37-15-30-14-129-2Z" fill="#f8d464" stroke="#cca33d" strokeWidth="2"/>
-        {double && <><path d="M57 123c15-18 172-18 186 0v13c-22 18-167 20-186-1Z" fill="#805139" stroke="#593c2c" strokeWidth="3"/><path d="m63 120 35 6 31 18 31-17 59 3 21-14-78-6Z" fill="#f6d16b" stroke="#c79d43" strokeWidth="2"/></>}
-        <path d={`M55 ${double ? '111' : '124'}c29-8 154-8 190 0l-1 9c-24 10-165 10-189 0Z`} fill="#db7052" stroke="#ae543b" strokeWidth="3"/>
-        <path d={`M52 ${double ? '105' : '118'}c10-10 17 5 26-3 13-10 26 6 38 0 11-10 20 7 33-1 18-11 28 8 43 0 15-9 26 6 36-2 9-5 17-2 20 6l-9 10c-16 8-20-7-35 1-19 9-21-6-38 2-16 8-24-6-37 0-17 10-20-9-36 0-17 10-23-5-35-1Z`} fill="#98bc63" stroke="#6e914b" strokeWidth="3"/>
-        <path d={`M50 ${double ? '105' : '118'}c0-45 39-72 101-72 61 0 98 29 99 72-32 16-166 16-200 0Z`} fill={`url(#bun-${uid})`} stroke="#ad793c" strokeWidth="3" transform={double ? 'translate(0 -5)' : undefined}/>
-        <g stroke="#fff3c9" strokeWidth="5"><path d="m92 82 6-4m29-12 4-6m33 11 7 2m25 11 5-3m-81 22 7-3m36 2 5-4m49 6 5 3"/></g>
-      </g>}
-      {recipe.kind === 'fries' && <g transform="translate(30 -12) scale(2)"><FoodIcon id="fries" size={120}/></g>}
-      {recipe.kind === 'dubious' && <g stroke="#52485e" strokeWidth="3" strokeLinejoin="round"><path d="M65 175c-11-17 4-33 22-35-5-23 19-39 41-27 14-25 46-20 51 2 29-10 50 13 37 33 22 3 31 22 17 36-25 20-148 19-168-9Z" fill="#8e8699"/><path d="M85 167c8-15 23-17 34-9 9-14 28-11 33 2 17-15 37-9 41 8" stroke="#b2a6b9" strokeWidth="7" strokeLinecap="round"/><circle cx="117" cy="145" r="5" fill="#c7c384" stroke="none"/><circle cx="185" cy="153" r="4" fill="#c7c384" stroke="none"/><path d="M104 107c-19-14 16-22 1-37m46 21c-19-15 16-22 1-37m40 50c-17-12 12-20 3-30" stroke="#9d93a4" strokeWidth="6" strokeLinecap="round" opacity=".6"/></g>}
+        <path d="M55 151c13-15 175-15 190 0v14c-17 16-170 18-190 0Z" fill="#754632" stroke="#573927" strokeWidth="3"/>
+        <path d="m52 147 47 5 27 14 27-15 57 7 37-15-30-7-129-2Z" fill="#f8d464" stroke="#cca33d" strokeWidth="2"/>
+        <path d="M55 128c29-8 154-8 190 0v14c-24 10-165 10-189 0Z" fill="#e6b66e" stroke="#b28143" strokeWidth="3"/>
+        <path d="M57 114c15-18 172-18 186 0v13c-22 18-167 20-186-1Z" fill="#805139" stroke="#593c2c" strokeWidth="3"/>
+        <path d="m70 119 9 3m17-9 9 4m20 6 9 3m24-9 11 4m27-7 9 4m14 4 9-4" stroke="#a0734b" strokeWidth="4"/>
+        <path d="M52 105c10-10 17 5 26-3 13-10 26 6 38 0 11-10 20 7 33-1 18-11 28 8 43 0 15-9 26 6 36-2 9-5 17-2 20 6l-9 10c-16 8-20-7-35 1-19 9-21-6-38 2-16 8-24-6-37 0-17 10-20-9-36 0-17 10-23-5-35-1Z" fill="#98bc63" stroke="#6e914b" strokeWidth="3"/>
+        <ellipse cx="114" cy="106" rx="24" ry="6" fill="#b0be69" stroke="#768b43" strokeWidth="2"/>
+        <ellipse cx="183" cy="106" rx="24" ry="6" fill="#b0be69" stroke="#768b43" strokeWidth="2"/>
+        <path d="M50 100c0-45 39-66 101-66 61 0 98 23 99 66-32 16-166 16-200 0Z" fill={`url(#bun-${uid})`} stroke="#ad793c" strokeWidth="3"/>
+        <g stroke="#fff3c9" strokeWidth="5"><path d="m92 72 6-4m29-12 4-6m33 11 7 2m25 11 5-3m-81 22 7-3m36 2 5-4m49 6 5 3"/></g>
+      </g>
     </svg>
   );
 }

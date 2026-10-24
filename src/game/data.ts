@@ -43,102 +43,30 @@ export const COOK_DURATION = 5.6;
 export const MAX_HELD = 5;
 export const COLLECTION_COOLDOWN = 45_000;
 
-export const RECIPES: Recipe[] = [
-  {
-    id: 'golden-cheese', name: '金色芝士牛肉堡', subtitle: '麦香与火光，刚刚好',
-    description: '芝士慢慢融化，裹住炙烤牛肉。最简单的组合，也能让漫长的旅途变得温暖。',
-    ingredients: ['bread', 'beef', 'cheese'], kind: 'burger', quality: 'success', catalogTag: 'cheeseburger', color: '#edbe59',
-  },
-  {
-    id: 'double-beef', name: '双层能量堡', subtitle: '为下一座山补充勇气',
-    description: '两层牛肉叠起满满的满足感。咬下这一口，再远的路也值得出发。',
-    ingredients: ['bread', 'beef', 'beef', 'cheese'], kind: 'burger', quality: 'success', catalogTag: 'double-beef', color: '#d68b4d',
-  },
-  {
-    id: 'forest-chicken', name: '森林酥鸡堡', subtitle: '一口清脆，一口酥香',
-    description: '翠绿生菜托着金黄酥鸡，仿佛把林间午后的阳光一起装进了面包。',
-    ingredients: ['bread', 'chicken', 'lettuce'], kind: 'burger', quality: 'success', catalogTag: 'chicken', color: '#9ebd64',
-  },
-  {
-    id: 'flame-chicken', name: '火焰鸡肉堡', subtitle: '给味蕾点一堆小小篝火',
-    description: '辣酱沿着酥鸡的纹理展开，热烈得像营地里跳动的火光。',
-    ingredients: ['bread', 'chicken', 'chili'], kind: 'burger', quality: 'success', catalogTag: 'spicy-chicken', color: '#dc7650',
-  },
-  {
-    id: 'sea-breeze', name: '海风鱼排堡', subtitle: '从溪流到远方的海',
-    description: '鲜香鱼排与酸脆黄瓜相遇，清爽的滋味让人想起吹过水面的风。',
-    ingredients: ['bread', 'fish', 'pickle'], kind: 'burger', quality: 'success', catalogTag: 'fish', color: '#80b8ab',
-  },
-  {
-    id: 'camp-fries', name: '篝火金薯条', subtitle: '把金色的快乐分给朋友',
-    description: '热腾腾的薯条带着微微辣意。围着篝火聊天时，总会不知不觉吃完。',
-    ingredients: ['fries', 'chili'], kind: 'fries', quality: 'success', catalogTag: 'fries', color: '#f0bd61',
-  },
-  {
-    id: 'garden-burger', name: '田园晨光堡', subtitle: '森林醒来时的味道',
-    description: '面包夹着生菜与番茄，清甜又轻盈。这是只在营地里才能尝到的原创料理。',
-    ingredients: ['bread', 'lettuce', 'tomato'], kind: 'burger', quality: 'success', color: '#9cb16b',
-  },
-  {
-    id: 'cheese-cloud', name: '芝士迷雾', subtitle: '好像……放得有点多了',
-    description: '浓厚的芝士盖住了一切。你试着找了找锅里的其他食材，只找到一团温暖的谜。',
-    ingredients: ['fish', 'cheese', 'cheese', 'cheese', 'cheese'], kind: 'dubious', quality: 'failure', color: '#e5be6f',
-  },
-  {
-    id: 'blazing-mystery', name: '炽热小火山', subtitle: '这份料理有自己的脾气',
-    description: '一阵热气扑面而来。或许下次少放一点辣酱，锅里的东西就能看得更清楚。',
-    ingredients: ['chili', 'chili', 'chili'], kind: 'dubious', quality: 'failure', color: '#c56b52',
-  },
-  {
-    id: 'dubious-stew', name: '不可思议的料理', subtitle: '勇气可嘉，味道待考',
-    description: '锅认真地完成了工作。至于这一团究竟是什么，森林里的传说还没有记载。',
-    ingredients: ['fish', 'beef', 'tomato'], kind: 'dubious', quality: 'failure', color: '#9a83a4',
-  },
-];
+/** The camp's magic pot turns every valid selection into the same signature burger. */
+export const BIG_MAC_RECIPE: Recipe = {
+  id: 'big-mac', name: '巨无霸', subtitle: '双层牛肉，三层麦香',
+  description: '金黄芝麻面包夹着双层牛肉、芝士、生菜与酸黄瓜，拌上浓郁酱汁。营地的魔法，让每一种搭配都变成这份经典汉堡。',
+  ingredients: ['bread', 'beef', 'beef', 'cheese', 'lettuce'],
+  kind: 'burger', quality: 'success', catalogTag: 'big-mac', color: '#edbe59',
+};
 
-const byId = Object.fromEntries(RECIPES.map((recipe) => [recipe.id, recipe])) as Record<string, Recipe>;
-const key = (ingredients: readonly IngredientId[]) => [...ingredients].sort().join('|');
-const exactRecipes = new Map(RECIPES.filter((recipe) => recipe.quality === 'success').map((recipe) => [key(recipe.ingredients), recipe]));
+export const RECIPES: Recipe[] = [BIG_MAC_RECIPE];
+
+// Keep completed meals from the previous recipe system when loading existing saves.
+export const LEGACY_RECIPE_IDS = [
+  'golden-cheese', 'double-beef', 'forest-chicken', 'flame-chicken', 'sea-breeze',
+  'camp-fries', 'garden-burger', 'cheese-cloud', 'blazing-mystery', 'dubious-stew',
+];
 
 export function isIngredientId(value: unknown): value is IngredientId {
   return typeof value === 'string' && Object.hasOwn(INGREDIENT_BY_ID, value);
 }
 
-/** Recipe discovery is deterministic: order never matters, quantity always does. */
 export function resolveRecipe(ingredients: IngredientId[]): Recipe {
-  const counts = ingredients.reduce<Partial<Record<IngredientId, number>>>((all, id) => {
-    all[id] = (all[id] ?? 0) + 1;
-    return all;
-  }, {});
-  const exact = exactRecipes.get(key(ingredients));
-  if (exact) return { ...exact, ingredients: [...ingredients] };
-
-  const allowed = (ids: IngredientId[]) => ingredients.every((id) => ids.includes(id));
-  let recipe: Recipe | undefined;
-
-  if (ingredients.length >= 1 && ingredients.length <= MAX_HELD && ingredients.every(isIngredientId)) {
-    // Each family accepts only compatible additions, so no fish/chicken mix silently becomes a beef burger.
-    if (counts.bread === 1 && (counts.beef ?? 0) >= 1 && counts.cheese && allowed(['bread', 'beef', 'cheese', 'lettuce', 'tomato', 'pickle'])) {
-      recipe = (counts.beef ?? 0) >= 2 ? byId['double-beef'] : byId['golden-cheese'];
-    } else if (counts.bread === 1 && counts.chicken && counts.chili && allowed(['bread', 'chicken', 'chili', 'lettuce', 'tomato', 'cheese'])) {
-      recipe = byId['flame-chicken'];
-    } else if (counts.bread === 1 && counts.chicken && counts.lettuce && allowed(['bread', 'chicken', 'lettuce', 'tomato', 'cheese', 'pickle'])) {
-      recipe = byId['forest-chicken'];
-    } else if (counts.bread === 1 && counts.fish && counts.pickle && allowed(['bread', 'fish', 'pickle', 'cheese', 'lettuce'])) {
-      recipe = byId['sea-breeze'];
-    } else if (counts.fries && counts.chili && allowed(['fries', 'chili'])) {
-      recipe = byId['camp-fries'];
-    }
+  if (ingredients.length < 1 || ingredients.length > MAX_HELD || !ingredients.every(isIngredientId)) {
+    throw new RangeError('烹饪需要 1 至 5 份有效食材');
   }
-
-  if (!recipe) {
-    recipe = (counts.cheese ?? 0) >= 3
-      ? byId['cheese-cloud']
-      : (counts.chili ?? 0) >= 2
-        ? byId['blazing-mystery']
-        : byId['dubious-stew'];
-  }
-
-  // Keep the actual combination on the result and in the recipe journal.
-  return { ...recipe, ingredients: [...ingredients] };
+  // Record the player's actual selection, including its order and repeated ingredients.
+  return { ...BIG_MAC_RECIPE, ingredients: [...ingredients] };
 }

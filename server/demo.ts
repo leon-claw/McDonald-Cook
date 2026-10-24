@@ -3,6 +3,7 @@ import { ApiError, type Adapter, type Product, type TrustedQuote } from './types
 
 // These are game demonstration fixtures, not a live McDonald's menu or prices.
 export const DEMO_PRODUCTS: Product[] = [
+  { id: 'demo-big-mac', name: '巨无霸', price: 26, catalogTag: 'big-mac' },
   { id: 'demo-cheeseburger', name: '金色芝士牛肉堡', price: 18, catalogTag: 'cheeseburger' },
   { id: 'demo-double-beef', name: '双层能量堡', price: 26, catalogTag: 'double-beef' },
   { id: 'demo-chicken', name: '酥脆鸡肉堡', price: 22, catalogTag: 'chicken' },

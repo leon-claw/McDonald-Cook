@@ -8,7 +8,7 @@ IngredientId = 'bread' | 'beef' | 'chicken' | 'fish' | 'cheese' | 'lettuce' | 't
 Ingredient = { id: IngredientId; name: string; description: string; color: string; category: string }.
 Export INGREDIENTS: Ingredient[], INGREDIENT_BY_ID: Record<IngredientId, Ingredient>.
 Recipe = { id: string; name: string; subtitle: string; description: string; ingredients: IngredientId[]; kind: 'burger' | 'fries' | 'dubious'; quality: 'success' | 'failure'; catalogTag?: string; color: string }.
-Export RECIPES: Recipe[], resolveRecipe(ingredients: IngredientId[]): Recipe. At least six successes and three failures. Exact deterministic multisets with meaningful class fallback, no misleading ingredient ignoring. Export COOK_DURATION = 5.6 (seconds).
+Export RECIPES: Recipe[], BIG_MAC_RECIPE, resolveRecipe(ingredients: IngredientId[]): Recipe. Every valid selection of 1–5 ingredients yields the successful `big-mac` / 巨无霸 burger with the same three-bun, two-patty 3D model. Preserve the actual selected ingredients and duplicates in the result and journal. Empty, oversized and unknown selections are invalid. Existing saved discoveries from the old recipe system migrate into the burger record, retaining completed counts, first discovery date and inventory. The `big-mac` catalog tag must match an actual 巨无霸 menu item, never another burger. Export COOK_DURATION = 5.6 (seconds).
 
 Store export useGameStore from Zustand with getState available. Fields:
 - phase: 'title' | 'explore' | 'cooking' | 'result'

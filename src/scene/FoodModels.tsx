@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import type { IngredientId, Recipe } from '../game/data';
 import { random } from './world';
 import { toonRamp } from './materials';
+import { BigMacModel } from './BigMacModel';
 
 const mat = (color: string) => <meshToonMaterial color={color} gradientMap={toonRamp} />;
 
@@ -81,22 +82,6 @@ export function FoodModel({ id, scale = 1 }: { id: IngredientId; scale?: number 
   </group>;
 }
 
-export function DishModel({ recipe, scale = 1 }: { recipe: Recipe; scale?: number }) {
-  if (recipe.kind === 'dubious') return <group scale={scale}><mesh position={[0,-.2,0]}><cylinderGeometry args={[.75,.55,.2,24]} />{mat('#e4d5ae')}</mesh>{[0,1,2,3,4].map(i=><mesh key={i} position={[Math.cos(i*2)*.25,i*.06,Math.sin(i*2)*.25]} scale={[.4,.3,.4]}><dodecahedronGeometry args={[1,0]} />{mat(i%2?'#7a627d':'#5c5364')}</mesh>)}</group>;
-  if (recipe.kind === 'fries') return <group scale={scale}><mesh position={[0,-.1,0]}><boxGeometry args={[.7,.55,.35]} />{mat('#c85941')}</mesh><group position={[0,.35,0]}><FoodModel id="fries" scale={1.1} /></group></group>;
-  const has=(id:IngredientId)=>recipe.ingredients.includes(id);
-  const protein=has('chicken')?'chicken':has('fish')?'fish':has('beef')?'beef':null;
-  const double=recipe.ingredients.filter(id=>id==='beef').length>1;
-  return <group scale={scale}>
-    <mesh position={[0,-.31,0]} castShadow receiveShadow><cylinderGeometry args={[.54,.49,.17,32]}/>{mat('#db9e55')}</mesh>
-    <mesh position={[0,-.22,0]}><cylinderGeometry args={[.52,.52,.018,32]}/>{mat('#f1c37c')}</mesh>
-    {has('lettuce')&&<group position={[0,-.17,0]}><FoodModel id="lettuce" scale={1.25}/></group>}
-    {has('tomato')&&<mesh position={[0,-.13,0]}><cylinderGeometry args={[.44,.44,.045,32]}/>{mat('#d55f43')}</mesh>}
-    {protein&&<group position={[0,-.09,0]}><FoodModel id={protein} scale={1.15}/></group>}
-    {has('cheese')&&<group position={[0,.015,0]}><FoodModel id="cheese" scale={1.3}/></group>}
-    {double&&<group position={[0,.13,0]}><FoodModel id="beef" scale={1.1}/></group>}
-    {has('pickle')&&[0,1,2].map(i=><mesh key={i} position={[(i-1)*.23,.055,.13]} rotation={[0,0,(i-1)*.08]}><cylinderGeometry args={[.13,.13,.025,16]}/>{mat('#9aaa4e')}</mesh>)}
-    {has('chili')&&<mesh position={[0,.025,0]}><cylinderGeometry args={[.46,.45,.018,24]}/>{mat('#bd5634')}</mesh>}
-    <group position={[0,double?.25:.06,0]}><FoodModel id="bread" scale={1.18}/></group>
-  </group>;
+export function DishModel({ scale = 1 }: { recipe: Recipe; scale?: number }) {
+  return <BigMacModel scale={scale}/>;
 }
