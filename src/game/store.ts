@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { COOK_DURATION, COLLECTION_COOLDOWN, INGREDIENTS, INGREDIENT_BY_ID, MAX_HELD, RECIPES, isIngredientId, resolveRecipe } from './data';
 import type { IngredientId, Recipe } from './data';
-import { initAudio, playSound, setAudioEnabled } from './audio';
+import { initAudio, playSound, setAudioEnabled, stopAllSounds } from './audio';
 import type { SoundName } from './audio';
 
 export type GamePhase = 'title' | 'explore' | 'cooking' | 'result';
@@ -47,7 +47,7 @@ type GameDependencies = {
   storage?: StorageLike | null;
   now?: () => number;
   wallNow?: () => number;
-  audio?: { init: () => void; play: (name: SoundName) => void; enabled: (value: boolean) => void };
+  audio?: { init: () => void; play: (name: SoundName) => void; enabled: (value: boolean) => void; stop?: () => void };
 };
 
 export function initialInventory(): Inventory {
@@ -100,7 +100,7 @@ export function createGameStore(dependencies: GameDependencies = {}) {
   const storage = dependencies.storage === undefined ? browserStorage() : dependencies.storage;
   const now = dependencies.now ?? (() => performance.now());
   const wallNow = dependencies.wallNow ?? (() => Date.now());
-  const audio = dependencies.audio ?? { init: initAudio, play: playSound, enabled: setAudioEnabled };
+  const audio = dependencies.audio ?? { init: initAudio, play: playSound, enabled: setAudioEnabled, stop: stopAllSounds };
   const saved = loadProgress(storage);
   audio.enabled(saved.soundEnabled);
   let toastTimer: ReturnType<typeof setTimeout> | undefined;
@@ -141,7 +141,11 @@ export function createGameStore(dependencies: GameDependencies = {}) {
       },
 
       closePanel: () => {
-        if (get().panel) { set({ panel: null }); sound('click'); }
+        const state = get();
+        if (!state.panel) return;
+        set({ panel: null });
+        sound('click');
+        if (state.panel === 'inventory' && state.held.length > 0) sound('hold');
       },
 
       selectIngredient: (id) => {
@@ -200,6 +204,7 @@ export function createGameStore(dependencies: GameDependencies = {}) {
           inventory[id] -= 1;
         }
         const ingredients = [...state.held];
+        audio.stop?.();
         set({ phase: 'cooking', panel: null, inventory, held: [], cookedIngredients: ingredients, result: resolveRecipe(ingredients), cookingStartedAt: now(), isNewRecipe: false, nearby: null, toast: null });
         sound('cook');
       },
@@ -209,13 +214,15 @@ export function createGameStore(dependencies: GameDependencies = {}) {
         if (state.phase !== 'cooking' || !state.result || now() - state.cookingStartedAt < COOK_DURATION * 1000) return;
         const previous = state.discoveries[state.result.id];
         const discovery = { at: previous?.at ?? new Date(wallNow()).toISOString(), ingredients: [...state.cookedIngredients], count: (previous?.count ?? 0) + 1 };
+        audio.stop?.();
         set({ phase: 'result', isNewRecipe: !previous, discoveries: { ...state.discoveries, [state.result.id]: discovery }, totalCooked: state.totalCooked + 1 });
         persist();
-        sound(state.result.quality === 'success' ? 'success' : 'failure');
+        sound(state.result.quality !== 'success' ? 'failure' : previous ? 'success' : 'discovery');
       },
 
       dismissResult: () => {
         if (get().phase !== 'result') return;
+        audio.stop?.();
         set({ phase: 'explore', panel: null, result: null, cookedIngredients: [], isNewRecipe: false });
         sound('click');
       },
@@ -237,6 +244,7 @@ export function createGameStore(dependencies: GameDependencies = {}) {
 
       resetProgress: () => {
         if (toastTimer) clearTimeout(toastTimer);
+        audio.stop?.();
         set({ phase: 'title', panel: null, inventory: initialInventory(), held: [], cookedIngredients: [], result: null, discoveries: {}, totalCooked: 0, isNewRecipe: false, cookingStartedAt: 0, collected: {}, nearby: null, toast: null });
         persist();
       },

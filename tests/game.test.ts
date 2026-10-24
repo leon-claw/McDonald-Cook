@@ -7,12 +7,13 @@ import { createGameStore, SAVE_KEY } from '../src/game/store';
 function setup(raw?: string) {
   const saved = new Map<string, string>(raw ? [[SAVE_KEY, raw]] : []);
   const sounds: string[] = [];
+  let stopped = 0;
   let time = 1000;
   let wallTime = Date.parse('2026-10-24T10:00:00Z');
   const storage = { getItem: (key: string) => saved.get(key) ?? null, setItem: (key: string, value: string) => { saved.set(key, value); }, removeItem: (key: string) => { saved.delete(key); } };
-  const options = { storage, now: () => time, wallNow: () => wallTime, audio: { init: () => undefined, play: (name: string) => { sounds.push(name); }, enabled: () => undefined } };
+  const options = { storage, now: () => time, wallNow: () => wallTime, audio: { init: () => undefined, play: (name: string) => { sounds.push(name); }, enabled: () => undefined, stop: () => { stopped += 1; } } };
   const store = createGameStore(options);
-  return { store, saved, sounds, options, advance: (ms: number) => { time += ms; wallTime += ms; } };
+  return { store, saved, sounds, options, stopCount: () => stopped, advance: (ms: number) => { time += ms; wallTime += ms; } };
 }
 
 function hold(store: ReturnType<typeof createGameStore>, ingredients: IngredientId[]) {
@@ -92,7 +93,7 @@ test('cooking requires held ingredients at the pot, consumes once, and reveals o
   assert.equal(store.getState().totalCooked, 1);
   assert.equal(store.getState().discoveries['golden-cheese']?.count, 1);
   assert.equal(store.getState().isNewRecipe, true);
-  assert.equal(sounds.filter((name) => name === 'success').length, 1);
+  assert.equal(sounds.filter((name) => name === 'discovery').length, 1);
 });
 
 test('collection cooldown prevents held interaction from duplicating a spawn and permits refill later', () => {
@@ -108,6 +109,47 @@ test('collection cooldown prevents held interaction from duplicating a spawn and
   advance(COLLECTION_COOLDOWN);
   store.getState().interact();
   assert.equal(store.getState().inventory.fish, 4);
+});
+
+test('voices follow held food and result cues distinguish discovery, repeat, and failure', () => {
+  const { store, sounds, advance, stopCount } = setup();
+  store.getState().startGame();
+  store.getState().openPanel('inventory');
+  store.getState().closePanel();
+  assert.equal(sounds.includes('hold'), false);
+  cook(store, ['bread', 'beef', 'cheese']);
+  assert.equal(sounds.filter(name => name === 'hold').length, 1);
+  assert.equal(stopCount(), 1);
+  advance(COOK_DURATION * 1000);
+  store.getState().finishCooking();
+  assert.equal(sounds.at(-1), 'discovery');
+  assert.equal(stopCount(), 2);
+  store.getState().dismissResult();
+  assert.equal(stopCount(), 3);
+  cook(store, ['bread', 'beef', 'cheese']);
+  advance(COOK_DURATION * 1000);
+  store.getState().finishCooking();
+  assert.equal(sounds.at(-1), 'success');
+  store.getState().dismissResult();
+  store.getState().setNearby({ kind: 'ingredient', label: '鱼排', ingredientId: 'fish', spawnId: 'fish-audio' });
+  store.getState().interact();
+  cook(store, ['fish']);
+  advance(COOK_DURATION * 1000);
+  store.getState().finishCooking();
+  assert.equal(sounds.at(-1), 'failure');
+});
+
+test('muted play still completes cooking and emits no cues until sound is enabled', () => {
+  const { store, sounds, advance } = setup();
+  store.getState().setSoundEnabled(false);
+  store.getState().startGame();
+  cook(store, ['bread', 'beef', 'cheese']);
+  advance(COOK_DURATION * 1000);
+  store.getState().finishCooking();
+  assert.equal(store.getState().phase, 'result');
+  assert.deepEqual(sounds, []);
+  store.getState().setSoundEnabled(true);
+  assert.deepEqual(sounds, ['click']);
 });
 
 test('completed progress survives reload and an interrupted animation does not lose food', () => {
