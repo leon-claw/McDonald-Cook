@@ -1,27 +1,117 @@
 {
   "version": 1,
-  "stores": { "name": "query-nearby-stores", "arguments": { "searchType": 2, "beType": 1, "city": { "$ref": "city" }, "keyword": { "$ref": "keyword" } } },
+  "stores": {
+    "name": "query-nearby-stores",
+    "arguments": {
+      "searchType": 2,
+      "beType": 1,
+      "city": {
+        "$ref": "city"
+      },
+      "keyword": {
+        "$ref": "keyword"
+      }
+    }
+  },
   "catalog": {
     "name": "query-meals",
-    "arguments": { "storeCode": { "$ref": "storeCode" }, "orderType": 1, "beType": 1 },
-    "productsPath": "data.meals", "idPath": "code", "namePath": "name", "pricePath": "currentPrice", "priceScale": 1
+    "arguments": {
+      "storeCode": {
+        "$ref": "storeCode"
+      },
+      "orderType": 1,
+      "beType": 1
+    },
+    "productsPath": "data.meals",
+    "idPath": "code",
+    "namePath": "name",
+    "pricePath": "currentPrice",
+    "priceScale": 1
   },
   "detail": {
     "name": "query-meal-detail",
-    "arguments": { "storeCode": { "$ref": "storeCode" }, "orderType": 1, "beType": 1, "code": { "$ref": "productId" } }
+    "arguments": {
+      "storeCode": {
+        "$ref": "storeCode"
+      },
+      "orderType": 1,
+      "beType": 1,
+      "code": {
+        "$ref": "productId"
+      }
+    }
   },
   "quote": {
     "name": "calculate-price",
-    "arguments": { "storeCode": { "$ref": "storeCode" }, "orderType": 1, "beType": 1, "items": { "$ref": "items" } },
-    "totalPath": "data.price", "priceScale": 0.01, "takeWaysPath": "data.takeWayList"
+    "arguments": {
+      "storeCode": {
+        "$ref": "storeCode"
+      },
+      "orderType": 1,
+      "beType": 1,
+      "items": {
+        "$ref": "items"
+      }
+    },
+    "totalPath": "data.price",
+    "priceScale": 0.01,
+    "takeWaysPath": "data.takeWayList"
   },
   "createOrder": {
     "name": "create-order",
-    "arguments": { "storeCode": { "$ref": "storeCode" }, "orderType": 1, "beType": 1, "items": { "$ref": "items" }, "takeWayCode": { "$ref": "takeWayCode" } },
-    "orderIdPath": "data.orderId", "payUrlPath": "data.payH5Url"
+    "arguments": {
+      "storeCode": {
+        "$ref": "storeCode"
+      },
+      "orderType": 1,
+      "beType": 1,
+      "items": {
+        "$ref": "items"
+      },
+      "takeWayCode": {
+        "$ref": "takeWayCode"
+      }
+    },
+    "orderIdPath": "data.orderId",
+    "payUrlPath": "data.payH5Url"
   },
   "catalogTags": {
+    "1100": "big-mac",
     "巨无霸": "big-mac",
-    "511782": "cheeseburger", "1120": "double-beef", "1406": "chicken", "1600": "fish", "1440": "spicy-chicken", "4810": "fries"
-  }
+    "1000": "beef",
+    "汉堡包": "beef",
+    "1010": "cheeseburger",
+    "吉士汉堡包": "cheeseburger",
+    "1120": "double-beef",
+    "双层吉士汉堡": "double-beef",
+    "511782": "angus",
+    "芝士安格斯厚牛堡": "angus",
+    "1450": "chicken",
+    "麦香鸡": "chicken",
+    "1440": "spicy-chicken",
+    "麦辣鸡腿汉堡": "spicy-chicken",
+    "1406": "grilled-chicken",
+    "板烧鸡腿堡": "grilled-chicken",
+    "1600": "fish",
+    "麦香鱼": "fish",
+    "520312": "double-fish",
+    "原味双层深海鳕鱼堡": "double-fish",
+    "1401": "nuggets",
+    "麦乐鸡": "nuggets",
+    "麦乐鸡5块": "nuggets",
+    "1700": "wings",
+    "麦辣鸡翅": "wings",
+    "麦辣鸡翅2块": "wings",
+    "4810": "fries",
+    "薯条": "fries",
+    "中薯条": "fries",
+    "521986": "cheese-sticks",
+    "马苏里拉拉丝芝士条": "cheese-sticks"
+  },
+  "variantGroups": [
+    "9900008747",
+    "牛肉堡单品精选",
+    "9900003586",
+    "双层深海鳕鱼堡"
+  ]
 }

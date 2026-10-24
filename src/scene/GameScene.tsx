@@ -82,7 +82,7 @@ function Scene({onNear}:{onNear:(near:Nearby)=>void}){
     if(state.phase==='title'){
       vectors.position.set(7+Math.sin(clock.elapsedTime*.06)*.7,3.8,6.5);vectors.target.set(-.6,1.25,-4);
     }else if(state.phase==='cooking'){
-      const t=(performance.now()-state.cookingStartedAt)/1000;
+      const t=Math.min(COOK_DURATION,(performance.now()-state.cookingStartedAt)/1000);
       vectors.position.set(3.9-t*.065,2.65,-.35-t*.035);vectors.target.set(-.25,t>4.2?1.65:1.18,-3.85);fov=mobile?54:43;
       if(t>=COOK_DURATION)state.finishCooking();
     }else if(state.phase==='result'){

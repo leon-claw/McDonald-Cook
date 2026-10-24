@@ -1,11 +1,20 @@
+import type { IngredientId, RecipeId } from '../src/game/data.js';
 export type Mode = 'demo' | 'live';
 export interface Store {
   code: string; name: string; address?: string; open?: boolean; hours?: string;
   reservationOptions?: { date: string; today: boolean; text: string }[];
 }
 export interface TakeWay { code: string; title: string; subtitle?: string }
-export interface Product { id: string; name: string; price: number | null; catalogTag: string }
+export interface Product {
+  id: string; name: string; price: number | null; catalogTag: string;
+  productCode?: string; choiceCode?: string; round?: string; supportModify?: boolean;
+}
 export interface Catalog { mode: Mode; store: Store; products: Product[]; message?: string }
+export interface CookingMatch {
+  mode: Mode; recipeId: RecipeId; modelVariant: RecipeId; preferredRecipeId: RecipeId;
+  product: Product; store: Store; ingredients: IngredientId[];
+  explanation: string; substituted: boolean; matchedAt: string;
+}
 export interface Quote {
   quoteId: string; mode: Mode; product: Product; store: Store;
   quantity: 1; total: number; currency: 'CNY'; expiresAt: string;

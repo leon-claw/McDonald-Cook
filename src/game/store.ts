@@ -1,11 +1,13 @@
 import { create } from 'zustand';
-import { COOK_DURATION, COLLECTION_COOLDOWN, INGREDIENTS, INGREDIENT_BY_ID, LEGACY_RECIPE_IDS, MAX_HELD, RECIPES, isIngredientId, resolveRecipe } from './data';
+import { COOK_DURATION, COLLECTION_COOLDOWN, INGREDIENTS, INGREDIENT_BY_ID, LEGACY_RECIPE_IDS, LEGACY_RECIPE_MAP, RECIPE_BY_ID, isRecipeId, MAX_HELD, RECIPES, isIngredientId, resolveRecipe } from './data';
 import type { IngredientId, Recipe } from './data';
 import { initAudio, playSound, setAudioEnabled, stopAllSounds } from './audio';
 import type { SoundName } from './audio';
+import type { CookingMatch } from '../../server/types';
+import { api } from './api';
 
 export type GamePhase = 'title' | 'explore' | 'cooking' | 'result';
-export type GamePanel = 'inventory' | 'recipes' | 'help' | 'order' | null;
+export type GamePanel = 'inventory' | 'recipes' | 'help' | 'order' | 'cook-error' | null;
 export type Nearby = { kind: 'pot' | 'ingredient'; label: string; ingredientId?: IngredientId; spawnId?: string } | null;
 export type Inventory = Record<IngredientId, number>;
 export type Discovery = { at: string; ingredients: IngredientId[]; count: number };
@@ -17,6 +19,11 @@ export interface GameState {
   held: IngredientId[];
   cookedIngredients: IngredientId[];
   result: Recipe | null;
+  cookingMatch: CookingMatch | null;
+  matching: boolean;
+  cookingError: string | null;
+  revealStartedAt: number;
+  cancelCooking: () => void;
   discoveries: Record<string, Discovery>;
   isNewRecipe: boolean;
   cookingStartedAt: number;
@@ -33,7 +40,7 @@ export interface GameState {
   clearHeld: () => void;
   setNearby: (nearby: Nearby) => void;
   interact: () => void;
-  startCooking: () => void;
+  startCooking: () => Promise<void>;
   finishCooking: () => void;
   dismissResult: () => void;
   setSoundEnabled: (value: boolean) => void;
@@ -45,6 +52,7 @@ export const SAVE_KEY = 'wildfire-kitchen:progress:v1';
 type StorageLike = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>;
 type GameDependencies = {
   storage?: StorageLike | null;
+  match?: (ingredients: IngredientId[], signal: AbortSignal) => Promise<CookingMatch>;
   now?: () => number;
   wallNow?: () => number;
   audio?: { init: () => void; play: (name: SoundName) => void; enabled: (value: boolean) => void; stop?: () => void };
@@ -72,7 +80,7 @@ function loadProgress(storage: StorageLike | null) {
     const raw = storage?.getItem(SAVE_KEY);
     if (!raw) return fallback;
     const parsed: unknown = JSON.parse(raw);
-    if (!object(parsed) || parsed.version !== 1 || !object(parsed.inventory)) return fallback;
+    if (!object(parsed) || ![1, 2].includes(Number(parsed.version)) || !object(parsed.inventory)) return fallback;
     const savedInventory = parsed.inventory;
     const inventory = Object.fromEntries(INGREDIENTS.map(({ id }) => [id, boundedCount(savedInventory[id])])) as Inventory;
     const discoveries: Record<string, Discovery> = {};
@@ -84,7 +92,7 @@ function loadProgress(storage: StorageLike | null) {
         const count = boundedCount(value.count, 1_000_000);
         if (count < 1) continue;
         const discovery: Discovery = { at: value.at, ingredients: [...value.ingredients], count };
-        const recipeId = resolveRecipe(value.ingredients).id;
+        const recipeId = isRecipeId(id) ? id : LEGACY_RECIPE_MAP[id];
         const previous = discoveries[recipeId];
         const earliest = previous && Date.parse(previous.at) <= Date.parse(discovery.at) ? previous : discovery;
         discoveries[recipeId] = { at: earliest.at, ingredients: [...earliest.ingredients], count: (previous?.count ?? 0) + count };
@@ -105,6 +113,10 @@ export function createGameStore(dependencies: GameDependencies = {}) {
   const now = dependencies.now ?? (() => performance.now());
   const wallNow = dependencies.wallNow ?? (() => Date.now());
   const audio = dependencies.audio ?? { init: initAudio, play: playSound, enabled: setAudioEnabled, stop: stopAllSounds };
+  const match = dependencies.match ?? ((ingredients, signal) => api<CookingMatch>('/api/cooking-match', { ingredients }, signal));
+  let operation = 0;
+  let controller: AbortController | null = null;
+  let pendingInventory: Inventory | null = null;
   const saved = loadProgress(storage);
   audio.enabled(saved.soundEnabled);
   let toastTimer: ReturnType<typeof setTimeout> | undefined;
@@ -115,7 +127,7 @@ export function createGameStore(dependencies: GameDependencies = {}) {
       // An interrupted cooking animation is not saved halfway through consumption.
       if (state.phase === 'cooking') return;
       try {
-        storage?.setItem(SAVE_KEY, JSON.stringify({ version: 1, inventory: state.inventory, discoveries: state.discoveries, totalCooked: state.totalCooked, soundEnabled: state.soundEnabled }));
+        storage?.setItem(SAVE_KEY, JSON.stringify({ version: 2, inventory: state.inventory, discoveries: state.discoveries, totalCooked: state.totalCooked, soundEnabled: state.soundEnabled }));
       } catch { /* private mode and full storage keep the current play session intact */ }
     };
 
@@ -125,8 +137,19 @@ export function createGameStore(dependencies: GameDependencies = {}) {
 
     return {
       phase: 'title', panel: null, ...saved, held: [], cookedIngredients: [], result: null,
+      cookingMatch: null, matching: false, cookingError: null, revealStartedAt: 0,
       isNewRecipe: false, cookingStartedAt: 0, collected: {}, nearby: null, toast: null,
 
+      cancelCooking: () => {
+        if (get().phase !== 'cooking') return;
+        operation++; controller?.abort(); controller = null;
+        audio.stop?.();
+        const inventory = pendingInventory ?? get().inventory;
+        pendingInventory = null;
+        set({ phase: 'explore', panel: null, inventory, held: [...get().cookedIngredients], cookedIngredients: [],
+          result: null, cookingMatch: null, matching: false, cookingError: null });
+        get().notify('食材已放回手中，可以重新烹饪');
+      },
       startGame: () => {
         if (get().phase !== 'title') return;
         set({ phase: 'explore', panel: null });
@@ -197,25 +220,50 @@ export function createGameStore(dependencies: GameDependencies = {}) {
         get().notify(`${INGREDIENT_BY_ID[id].name} +${amount}`);
       },
 
-      startCooking: () => {
+      startCooking: async () => {
         const state = get();
         if (state.phase !== 'explore' || state.panel || state.nearby?.kind !== 'pot') return;
         if (!state.held.length) { state.notify('打开背包，先把食材拿在手里'); return; }
         if (state.held.length > MAX_HELD) return;
+        try { resolveRecipe(state.held); }
+        catch (error) { state.notify((error as Error).message); return; }
         const inventory = { ...state.inventory };
         for (const id of state.held) {
           if (!isIngredientId(id) || inventory[id] < 1) return;
           inventory[id] -= 1;
         }
         const ingredients = [...state.held];
+        const currentOperation = ++operation;
+        controller?.abort(); controller = new AbortController();
+        pendingInventory = state.inventory;
         audio.stop?.();
-        set({ phase: 'cooking', panel: null, inventory, held: [], cookedIngredients: ingredients, result: resolveRecipe(ingredients), cookingStartedAt: now(), isNewRecipe: false, nearby: null, toast: null });
+        set({ phase: 'cooking', panel: null, inventory, held: [], cookedIngredients: ingredients,
+          result: null, cookingMatch: null, matching: true, cookingError: null, revealStartedAt: 0,
+          cookingStartedAt: now(), isNewRecipe: false, nearby: null, toast: null });
         sound('cook');
+        try {
+          const matched = await match(ingredients, controller.signal);
+          if (operation !== currentOperation || get().phase !== 'cooking') return;
+          if (!isRecipeId(matched.recipeId) || matched.modelVariant !== matched.recipeId
+            || matched.product.catalogTag !== matched.recipeId || !matched.store.code
+            || !['live', 'demo'].includes(matched.mode)) throw new Error('餐品匹配信息发生变化，请重新烹饪。');
+          set({ matching: false, cookingMatch: matched,
+            result: { ...RECIPE_BY_ID[matched.recipeId], name: matched.product.name, ingredients },
+            revealStartedAt: Math.max(now(), get().cookingStartedAt + 4350) });
+        } catch (error) {
+          if (operation !== currentOperation || get().phase !== 'cooking') return;
+          audio.stop?.();
+          const message = error instanceof Error && error.name !== 'TimeoutError' ? error.message : '菜单查询超时，请稍后重试。';
+          set({ phase: 'explore', panel: 'cook-error', inventory: pendingInventory ?? state.inventory,
+            held: ingredients, cookedIngredients: [], result: null, cookingMatch: null, matching: false, cookingError: message });
+          pendingInventory = null;
+        }
       },
 
       finishCooking: () => {
         const state = get();
-        if (state.phase !== 'cooking' || !state.result || now() - state.cookingStartedAt < COOK_DURATION * 1000) return;
+        if (state.phase !== 'cooking' || state.matching || !state.result || now() - state.cookingStartedAt < COOK_DURATION * 1000 || now() - state.revealStartedAt < 1250) return;
+        pendingInventory = null;
         const previous = state.discoveries[state.result.id];
         const discovery = { at: previous?.at ?? new Date(wallNow()).toISOString(), ingredients: [...state.cookedIngredients], count: (previous?.count ?? 0) + 1 };
         audio.stop?.();
@@ -227,7 +275,7 @@ export function createGameStore(dependencies: GameDependencies = {}) {
       dismissResult: () => {
         if (get().phase !== 'result') return;
         audio.stop?.();
-        set({ phase: 'explore', panel: null, result: null, cookedIngredients: [], isNewRecipe: false });
+        set({ phase: 'explore', panel: null, result: null, cookingMatch: null, cookedIngredients: [], isNewRecipe: false });
         sound('click');
       },
 
@@ -247,9 +295,10 @@ export function createGameStore(dependencies: GameDependencies = {}) {
       },
 
       resetProgress: () => {
+        operation++; controller?.abort(); controller = null; pendingInventory = null;
         if (toastTimer) clearTimeout(toastTimer);
         audio.stop?.();
-        set({ phase: 'title', panel: null, inventory: initialInventory(), held: [], cookedIngredients: [], result: null, discoveries: {}, totalCooked: 0, isNewRecipe: false, cookingStartedAt: 0, collected: {}, nearby: null, toast: null });
+        set({ phase: 'title', panel: null, inventory: initialInventory(), held: [], cookedIngredients: [], result: null, discoveries: {}, totalCooked: 0, isNewRecipe: false, cookingStartedAt: 0, collected: {}, nearby: null, toast: null, matching: false, cookingMatch: null, cookingError: null, revealStartedAt: 0 });
         persist();
       },
     };

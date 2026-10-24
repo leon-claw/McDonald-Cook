@@ -135,3 +135,22 @@ test('corrupt ledgers fail startup instead of losing duplicate-order protection'
   await writeFile(ledgerPath, '{broken');
   await assert.rejects(createApp({ adapter: new DemoAdapter(), ledgerPath }), /订单记录无法读取/);
 });
+
+
+test('cooking-match accepts only owned ingredient vocabulary and never creates an order', async t => {
+  const adapter = new DemoAdapter(); let creates = 0;
+  adapter.createOrder = async () => { creates++; throw new Error('must not create'); };
+  const { request } = await fixture(t, { adapter });
+  const fish = await request('/api/cooking-match', { ingredients:['bread','fish','fish'] });
+  assert.equal(fish.status,200); assert.equal(fish.body.recipeId,'double-fish');
+  assert.equal(fish.body.product.catalogTag,fish.body.modelVariant); assert.equal(fish.body.mode,'demo');
+  assert.equal(fish.body.store.code,'demo-camp');
+  const priced = await request('/api/quote', { productId: fish.body.product.id, storeCode: fish.body.store.code, quantity: 1 });
+  assert.equal(priced.status, 200);
+  assert.equal(priced.body.product.id, fish.body.product.id);
+  assert.equal(priced.body.store.code, fish.body.store.code);
+  for (const ingredients of [[],['invented'],Array(6).fill('beef'),['bread','lettuce']]) {
+    assert.equal((await request('/api/cooking-match',{ingredients})).status,400);
+  }
+  assert.equal(creates,0);
+});

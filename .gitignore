@@ -8,3 +8,7 @@ output/
 .playwright-cli/
 *.log
 .DS_Store
+
+# Downloaded source audio library; runtime samples are tracked in selected/.
+resource/sound/botw_music/
+resource/sound/botw_sfx/

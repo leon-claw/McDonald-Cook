@@ -9,9 +9,9 @@ const palette = {
   beef: '#66402b', lettuce: '#88b747', cheese: '#f7bd2b', sauce: '#db9b67',
 };
 
-type Instance = { position: [number, number, number]; rotation: [number, number, number]; scale: [number, number, number]; color?: string };
+export type Instance = { position: [number, number, number]; rotation: [number, number, number]; scale: [number, number, number]; color?: string };
 
-function Details({ geometry, instances, color, doubleSide = false }: {
+export function Details({ geometry, instances, color, doubleSide = false }: {
   geometry: THREE.BufferGeometry; instances: Instance[]; color: string; doubleSide?: boolean;
 }) {
   const mesh = useRef<THREE.InstancedMesh>(null);
@@ -35,7 +35,7 @@ function Details({ geometry, instances, color, doubleSide = false }: {
   </instancedMesh>;
 }
 
-function bunGeometry(profile: [number, number][], seed: number) {
+export function bunGeometry(profile: [number, number][], seed: number) {
   const geometry = new THREE.LatheGeometry(profile.map(([radius, height]) => new THREE.Vector2(radius, height)), 64);
   const positions = geometry.attributes.position;
   const colors: number[] = [];
@@ -56,7 +56,7 @@ function bunGeometry(profile: [number, number][], seed: number) {
   return geometry;
 }
 
-function pattyGeometry() {
+export function pattyGeometry() {
   const geometry = new THREE.CylinderGeometry(.604, .615, .128, 64, 3);
   const positions = geometry.attributes.position, colors: number[] = [];
   for (let i = 0; i < positions.count; i++) {
@@ -71,7 +71,7 @@ function pattyGeometry() {
   return geometry;
 }
 
-function lettuceGeometry() {
+export function lettuceGeometry() {
   const geometry = new THREE.PlaneGeometry(.27, .07, 8, 3);
   geometry.rotateX(-Math.PI / 2);
   const positions = geometry.attributes.position;
@@ -83,7 +83,7 @@ function lettuceGeometry() {
   return geometry;
 }
 
-function cheeseGeometry() {
+export function cheeseGeometry() {
   const geometry = new THREE.PlaneGeometry(1.08, 1.02, 20, 20);
   geometry.rotateX(-Math.PI / 2);
   const positions = geometry.attributes.position;

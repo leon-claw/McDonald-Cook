@@ -41,8 +41,9 @@ function ResultPanel(){
     <section className="result-panel" role="dialog" aria-label="料理结果">
       <small className="result-eyebrow">{r.quality==='success'?'COOKING COMPLETE':'A LITTLE SURPRISE'}</small>
       <h1>{r.name}</h1><div className="result-rule"/><p className="subtitle">{r.subtitle}</p><p className="description">{r.description}</p>
+      {state.cookingMatch&&<div className="match-notes"><span>{state.cookingMatch.mode==='live'?'真实菜单':'演示料理'}</span><p>{state.cookingMatch.explanation}</p></div>}
       <div className="recipe-ingredients">{state.cookedIngredients.map((id,i)=><FoodIcon key={`${id}-${i}`} id={id} size={35}/>)}</div>
-      {ordering&&r.catalogTag?<OrderPanel catalogTag={r.catalogTag}/>:<div className="result-actions">{r.catalogTag&&<button className="outline-btn" onClick={()=>setOrdering(true)}>创建麦当劳订单 <span>→</span></button>}<button className="subtle-btn" onClick={state.dismissResult}>继续冒险 <kbd>Esc</kbd></button></div>}
+      {ordering&&state.cookingMatch?<OrderPanel match={state.cookingMatch}/>:<div className="result-actions">{state.cookingMatch&&<button className="outline-btn" onClick={()=>setOrdering(true)}>创建麦当劳订单 <span>→</span></button>}<button className="subtle-btn" onClick={state.dismissResult}>继续冒险 <kbd>Esc</kbd></button></div>}
       {ordering&&<button className="subtle-btn" onClick={state.dismissResult}>回到营地</button>}
     </section>
   </div>;
@@ -66,7 +67,15 @@ function MiniMap(){
     </g></svg><div className="map-weather"><Sun size={15}/><span>16:20</span><span className="weather-dots">···</span></div></aside>;
 }
 
-function CookingOverlay(){return <div className="cooking-overlay" aria-live="polite"><div className="cinema-bar top"/><div className="cinema-bar bottom"/><div className="cooking-captions"><span>把食材放入锅中</span><span>咕嘟、咕嘟……</span><span>香气飘起来了</span><span>完成！</span></div></div>}
+function CookingOverlay(){
+  const matching=useGameStore(s=>s.matching),startedAt=useGameStore(s=>s.cookingStartedAt);
+  const [waiting,setWaiting]=useState(false);
+  useEffect(()=>{const timer=window.setTimeout(()=>setWaiting(true),Math.max(0,5600-(performance.now()-startedAt)));return()=>window.clearTimeout(timer)},[startedAt]);
+  return <div className="cooking-overlay" aria-live="polite"><div className="cinema-bar top"/><div className="cinema-bar bottom"/>
+    {!(waiting&&matching)&&<div className="cooking-captions"><span>把食材放入锅中</span><span>咕嘟、咕嘟……</span><span>香气飘起来了</span><span>{matching?'正在确认餐品…':'完成！'}</span></div>}
+    {matching&&<div className="menu-wait"><p>{waiting?'料理还在准备中，请稍候…':'正在寻找最合适的料理…'}</p><button className="subtle-btn" onClick={useGameStore.getState().cancelCooking}>取回食材</button></div>}
+  </div>;
+}
 
 function App(){
   const [near,setNear]=useState<Nearby>(null);const state=useGameStore();
@@ -82,15 +91,16 @@ function App(){
   },[state]);
   return <main className={`game-shell phase-${state.phase} ${state.panel?'panel-open':''}`}>
     <GameCanvas onNear={setNear}/><div className="scene-vignette"/>
-    {state.phase==='title'&&<div className="title-screen"><div className="title-copy"><div className="title-kicker"><span/> WILDFIRE KITCHEN</div><h1>麦野<span>食光</span></h1><p>风经过旷野，香气留在锅边。</p><button className="start-btn" onClick={state.startGame}>开始冒险 <span>→</span></button><div className="title-foot">探索 · 收集 · 料理</div></div><div className="title-location"><span>第一章</span><b>初见之森</b><small>THE FIRST CAMP</small></div></div>}
+    {state.phase==='title'&&<div className="title-screen"><div className="title-copy"><div className="title-kicker"><span/> THE LEGEND OF MCDONALD'S</div><h1>麦当劳<span>传说</span></h1><p>风经过旷野，香气留在锅边。</p><button className="start-btn" onClick={state.startGame}>开始冒险 <span>→</span></button><div className="title-foot">探索 · 收集 · 料理</div></div><div className="title-location"><span>第一章</span><b>初见之森</b><small>THE FIRST CAMP</small></div></div>}
     {state.phase==='explore'&&!state.panel&&<>
       <div className="hud"><div className="hud-left"><div className="hearts" aria-label="旅途状态">♥ ♥ ♥</div><div className="location"><b>初见之森</b><span>料理营地</span></div></div><div className="hud-actions"><button title="已发现的食谱" onClick={()=>state.openPanel('recipes')}><BookOpen size={19}/><span>食谱</span><kbd>R</kbd></button><button title="打开背包" onClick={()=>state.openPanel('inventory')}><Backpack size={20}/><span>背包</span><kbd>Tab</kbd></button><button title={state.soundEnabled?'关闭声音':'打开声音'} aria-label={state.soundEnabled?'关闭声音':'打开声音'} onClick={()=>state.setSoundEnabled(!state.soundEnabled)}>{state.soundEnabled?<Volume2 size={18}/>:<VolumeX size={18}/>}</button></div></div>
-      <div className="objective"><span>◇</span><div><small>{state.totalCooked?'料理的可能性':'第一份野外料理'}</small><p>{state.totalCooked?'收集更多材料，再做一份巨无霸':'打开背包，任选 1–5 份材料做汉堡'}</p></div></div>
+      <div className="objective"><span>◇</span><div><small>{state.totalCooked?'料理的可能性':'第一份野外料理'}</small><p>{state.totalCooked?'试试不同主料，发现 14 种料理':'打开背包，搭配主料与配料做料理'}</p></div></div>
       <MiniMap/><div className="controls"><span><kbd>W A S D</kbd> 移动</span><span><kbd>Shift</kbd> 奔跑</span><span>拖动视角</span></div><MobilePad/>
       {near&&<button className="interact-btn" onClick={()=>{if(near.kind==='pot'&&!state.held.length)state.openPanel('inventory');else state.interact()}}><kbd>E</kbd>{near.kind==='pot'?(state.held.length?'烹饪':'手持食材'):`拾取 ${near.label}`}<span>＋</span></button>}
       {state.held.length>0&&<div className="held-hud"><PotIcon size={17}/>{state.held.map((id,i)=><FoodIcon key={`${id}-${i}`} id={id} size={30}/>)}<span>走近料理锅</span></div>}
     </>}
     {state.toast&&state.phase==='explore'&&<div className="toast">{state.toast}</div>}
+    {state.panel==='cook-error'&&<Panel title="这锅还需要一点时间" onClose={state.closePanel}><div className="cooking-error"><p role="alert">{state.cookingError}</p><p>食材已经放回手中，没有消耗。稍后可以重新烹饪。</p><div className="result-actions"><button className="outline-btn" onClick={()=>{state.closePanel();state.setNearby({kind:'pot',label:'料理锅'});void state.startCooking()}}>重试这锅料理</button></div></div></Panel>}
     {state.panel==='inventory'&&<InventoryPanel/>}
     {state.panel==='recipes'&&<Panel title="料理手记" onClose={state.closePanel}><div className="recipe-list">{RECIPES.filter(r=>state.discoveries[r.id]).map(r=><div className="recipe-row" key={r.id}><DishIcon recipe={r} size={62}/><div><b>{r.name}</b><small>{state.discoveries[r.id].count} 次完成 · {r.subtitle}</small></div></div>)}{!Object.keys(state.discoveries).length&&<div className="empty-recipe">火已经生好了。<br/>第一份食谱，正等着你发现。</div>}</div></Panel>}
     {state.phase==='cooking'&&<CookingOverlay/>}{state.phase==='result'&&<ResultPanel/>}

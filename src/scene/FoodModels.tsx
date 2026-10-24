@@ -4,6 +4,7 @@ import type { IngredientId, Recipe } from '../game/data';
 import { random } from './world';
 import { toonRamp } from './materials';
 import { BigMacModel } from './BigMacModel';
+import { BurgerModel, CheeseSticksModel, ChickenSnackModel, FriesModel } from './MenuFoodModels';
 
 const mat = (color: string) => <meshToonMaterial color={color} gradientMap={toonRamp} />;
 
@@ -78,10 +79,16 @@ export function FoodModel({ id, scale = 1 }: { id: IngredientId; scale?: number 
     {id === 'tomato' && <><mesh scale={[.34,.28,.34]} castShadow><sphereGeometry args={[1,16,12]} />{mat('#d75b43')}</mesh><mesh position={[0,.28,0]} rotation={[0,0,.3]}><cylinderGeometry args={[.025,.04,.16,5]} />{mat('#4c7844')}</mesh></>}
     {id === 'pickle' && <mesh rotation={[0,0,.7]} scale={[.17,.45,.17]} castShadow><capsuleGeometry args={[1,1,3,8]} />{mat('#7b9a3f')}</mesh>}
     {id === 'chili' && <><mesh rotation={[0,0,-.5]} scale={[.18,.5,.18]} castShadow><coneGeometry args={[1,1.8,10]} />{mat('#cd5039')}</mesh><mesh position={[.13,.43,0]} rotation={[0,0,-.4]}><cylinderGeometry args={[.035,.04,.18,6]} />{mat('#577e44')}</mesh></>}
+    {id === 'roast-sauce' && <group><mesh position={[0,-.04,0]} castShadow><cylinderGeometry args={[.19,.22,.48,24]}/>{mat('#a56a36')}</mesh><mesh position={[0,.23,0]} castShadow><cylinderGeometry args={[.12,.14,.11,20]}/>{mat('#735235')}</mesh><mesh position={[0,-.02,.203]}><planeGeometry args={[.21,.22]}/>{mat('#e9d19b')}</mesh></group>}
     {id === 'fries' && <group>{[-2,-1,0,1,2].map((n)=><mesh key={n} position={[n*.1,.05+Math.abs(n)*.025,0]} rotation={[0,0,n*.09]} castShadow><boxGeometry args={[.09,.65-Math.abs(n)*.05,.12]} />{mat(n%2?'#eeba48':'#f4cc64')}</mesh>)}</group>}
   </group>;
 }
 
-export function DishModel({ scale = 1 }: { recipe: Recipe; scale?: number }) {
-  return <BigMacModel scale={scale}/>;
+export function DishModel({ recipe, scale = 1 }: { recipe: Recipe; scale?: number }) {
+  const variant = recipe.modelVariant;
+  if (variant === 'big-mac') return <BigMacModel scale={scale}/>;
+  if (variant === 'fries') return <FriesModel scale={scale}/>;
+  if (variant === 'nuggets' || variant === 'wings') return <ChickenSnackModel wings={variant === 'wings'} scale={scale * 1.12}/>;
+  if (variant === 'cheese-sticks') return <CheeseSticksModel scale={scale * 1.12}/>;
+  return <BurgerModel variant={variant} scale={scale * 1.06}/>;
 }

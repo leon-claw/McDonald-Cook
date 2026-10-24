@@ -1,17 +1,12 @@
+import { RECIPES } from '../src/game/data.js';
 import { randomUUID } from 'node:crypto';
 import { ApiError, type Adapter, type Product, type TrustedQuote } from './types.js';
 
 // These are game demonstration fixtures, not a live McDonald's menu or prices.
-export const DEMO_PRODUCTS: Product[] = [
-  { id: 'demo-big-mac', name: '巨无霸', price: 26, catalogTag: 'big-mac' },
-  { id: 'demo-cheeseburger', name: '金色芝士牛肉堡', price: 18, catalogTag: 'cheeseburger' },
-  { id: 'demo-double-beef', name: '双层能量堡', price: 26, catalogTag: 'double-beef' },
-  { id: 'demo-chicken', name: '酥脆鸡肉堡', price: 22, catalogTag: 'chicken' },
-  { id: 'demo-fish', name: '海风鱼排堡', price: 21, catalogTag: 'fish' },
-  { id: 'demo-spicy-chicken', name: '烈焰鸡肉堡', price: 23, catalogTag: 'spicy-chicken' },
-  { id: 'demo-fries', name: '金黄薯条', price: 12, catalogTag: 'fries' },
-  { id: 'demo-beef', name: '牧野牛肉堡', price: 17, catalogTag: 'beef' },
-];
+export const DEMO_PRODUCTS: Product[] = RECIPES.map(recipe => ({
+  id: `demo-${recipe.id}`, name: recipe.name, price: recipe.id === 'double-beef' ? 26 : recipe.kind === 'burger' ? 22 : 12,
+  catalogTag: recipe.id,
+}));
 export class DemoAdapter implements Adapter {
   mode = 'demo' as const;
   async health() { return { mode: this.mode, ready: true, message: '演示模式，不会产生真实订单或扣款。' }; }

@@ -4,9 +4,13 @@ type Voice = { source: AudioScheduledSourceNode; gain: GainNode; channel: Channe
 
 // Static URLs let Vite serve the original local files and bundle only the selected samples.
 const samples = {
-  pickup: new URL('../../resource/sound/botw_fanfares/BOTW_Fanfare_SmallItem.wav', import.meta.url).href,
-  success: new URL('../../resource/sound/botw_fanfares/BOTW_Fanfare_Item.wav', import.meta.url).href,
-  discovery: new URL('../../resource/sound/botw_fanfares/BOTW_Secret.wav', import.meta.url).href,
+  pickup: new URL('../../resource/sound/selected/SYS_ItemGet_Common.wav', import.meta.url).href,
+  cook: new URL('../../resource/sound/selected/BGM_CookingSuccess.wav', import.meta.url).href,
+  success: new URL('../../resource/sound/selected/Event_Cook_Success.wav', import.meta.url).href,
+  laugh: [
+    new URL('../../resource/sound/selected/PV618_00.wav', import.meta.url).href,
+    new URL('../../resource/sound/selected/PV618_02.wav', import.meta.url).href,
+  ],
   failure: new URL('../../resource/sound/botw_link/BOTW_Link_LoseBalance.wav', import.meta.url).href,
   lift: [
     new URL('../../resource/sound/botw_link/BOTW_Link_Lift1.wav', import.meta.url).href,
@@ -165,7 +169,7 @@ function successFallback(): void {
   [523.25, 659.25, 783.99, 1046.5].forEach((frequency, index) => note(frequency, index * 0.09, 0.7, 0.2, 'triangle', 'result'));
 }
 
-/** Downloaded action/fanfare samples, with synthesized UI and cooking cues for missing assets. */
+/** Local action, cooking, and result samples, with synthesized UI cues and fallback tones. */
 export function playSound(name: SoundName): void {
   if (!enabled) return;
   initAudio();
@@ -174,7 +178,7 @@ export function playSound(name: SoundName): void {
     switch (name) {
       case 'pickup':
         stopChannel('pickup');
-        sample(samples.pickup, 'pickup', 0.85, 0, () => {
+        sample(samples.pickup, 'pickup', 0.65, 0, () => {
           note(660, 0, 0.13, 0.25, 'sine', 'pickup');
           note(990, 0.07, 0.22, 0.2, 'sine', 'pickup');
         });
@@ -193,20 +197,16 @@ export function playSound(name: SoundName): void {
         stopChannel('cooking');
         // The first ingredient leaves the hands at 0.18 s; one throw voice accompanies the batch.
         sample(variant(samples.throw), 'voice', 1.4, 0.18);
-        // No cooking track is present in the local pack. Keep the rhythm beneath the bouncing food.
-        const melody = [392, 523.25, 440, 659.25, 587.33, 523.25, 783.99, 659.25, 880, 783.99, 1046.5];
-        melody.forEach((frequency, index) => {
-          const beat = 1.05 + index * 0.28;
-          note(frequency, beat, 0.22, 0.18, 'triangle', 'cooking');
-          note(index % 2 ? 146.83 : 130.81, beat, 0.14, 0.22, 'sine', 'cooking');
-        });
-        note(262, 4.3, 0.45, 0.15, 'sine', 'cooking');
+        // The 4.90 s track follows the throw and ends just before the 5.6 s result transition.
+        sample(samples.cook, 'cooking', 1.8, 0.6);
         break;
       }
       case 'success':
       case 'discovery':
         stopChannel('result');
-        sample(samples[name], 'result', 0.72, 0, successFallback);
+        stopChannel('voice');
+        sample(samples.success, 'result', 2.2, 0, successFallback);
+        sample(variant(samples.laugh), 'voice', 1.65, 0.75);
         break;
       case 'failure':
         stopChannel('result');

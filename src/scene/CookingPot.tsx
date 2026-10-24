@@ -87,11 +87,12 @@ function RevealDish(){
   const dish=useRef<THREE.Group>(null),burst=useRef<THREE.Group>(null);
   const recipe=useGameStore(s=>s.result);
   useFrame(({clock})=>{
-    const state=useGameStore.getState(),t=(performance.now()-state.cookingStartedAt)/1000;
-    const visible=(state.phase==='cooking'&&t>4.35)||state.phase==='result';
+    const state=useGameStore.getState();
+    const revealT=(performance.now()-state.revealStartedAt)/1000;
+    const visible=!!state.result&&((state.phase==='cooking'&&revealT>0)||state.phase==='result');
     if(dish.current){
       dish.current.visible=visible;
-      const p=THREE.MathUtils.clamp((t-4.35)/.65,0,1),ease=1-Math.pow(1-p,3);
+      const p=THREE.MathUtils.clamp(revealT/.65,0,1),ease=1-Math.pow(1-p,3);
       dish.current.position.y=1.1+ease*1.1+Math.sin(clock.elapsedTime*1.7)*.045;
       dish.current.rotation.y=clock.elapsedTime*.28;
       dish.current.scale.setScalar(.05+ease*1.14);

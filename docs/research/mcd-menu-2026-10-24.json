@@ -1,0 +1,1083 @@
+{
+  "observedAt": "2026-10-24T14:08:17.045Z",
+  "researchDate": "2026-10-24",
+  "timeZone": "Asia/Shanghai",
+  "source": "McDonald China MCP configured in local server environment",
+  "toolsUsed": [
+    "tools/list",
+    "query-nearby-stores",
+    "query-meals",
+    "query-meal-detail",
+    "calculate-price"
+  ],
+  "orderCreated": false,
+  "notes": [
+    "Shanghai sample stores were selected for research, not as the player pickup choice.",
+    "Prices and listed availability are observations at query time, not fixed promises.",
+    "Every price check below is a separate calculate-price invocation; no create-order invocation occurred.",
+    "Child products must be selected through the listed parent product where applicable."
+  ],
+  "stores": [
+    {
+      "code": "1450713",
+      "name": "麦当劳上海黄浦华旭国际大厦餐厅",
+      "listedCandidates": [
+        {
+          "code": "1100",
+          "name": "巨无霸"
+        },
+        {
+          "code": "1120",
+          "name": "双层吉士汉堡"
+        },
+        {
+          "code": "511782",
+          "name": "芝士安格斯厚牛堡"
+        },
+        {
+          "code": "1450",
+          "name": "麦香鸡"
+        },
+        {
+          "code": "1440",
+          "name": "麦辣鸡腿汉堡"
+        },
+        {
+          "code": "1406",
+          "name": "板烧鸡腿堡"
+        },
+        {
+          "code": "1600",
+          "name": "麦香鱼"
+        },
+        {
+          "code": "9900003586",
+          "name": "双层深海鳕鱼堡"
+        },
+        {
+          "code": "1401",
+          "name": "麦乐鸡"
+        },
+        {
+          "code": "1700",
+          "name": "麦辣鸡翅"
+        },
+        {
+          "code": "4810",
+          "name": "薯条"
+        },
+        {
+          "code": "9900008747",
+          "name": "牛肉堡单品精选"
+        },
+        {
+          "code": "521986",
+          "name": "马苏里拉拉丝芝士条"
+        }
+      ]
+    },
+    {
+      "code": "1450056",
+      "name": "麦当劳上海食品一店餐厅",
+      "listedCandidates": [
+        {
+          "code": "1100",
+          "name": "巨无霸"
+        },
+        {
+          "code": "1120",
+          "name": "双层吉士汉堡"
+        },
+        {
+          "code": "511782",
+          "name": "芝士安格斯厚牛堡"
+        },
+        {
+          "code": "1450",
+          "name": "麦香鸡"
+        },
+        {
+          "code": "1406",
+          "name": "板烧鸡腿堡"
+        },
+        {
+          "code": "1600",
+          "name": "麦香鱼"
+        },
+        {
+          "code": "9900003586",
+          "name": "双层深海鳕鱼堡"
+        },
+        {
+          "code": "1401",
+          "name": "麦乐鸡"
+        },
+        {
+          "code": "1700",
+          "name": "麦辣鸡翅"
+        },
+        {
+          "code": "4810",
+          "name": "薯条"
+        },
+        {
+          "code": "9900008747",
+          "name": "牛肉堡单品精选"
+        }
+      ]
+    }
+  ],
+  "detailStoreCode": "1450713",
+  "details": [
+    {
+      "code": "1100",
+      "name": "巨无霸",
+      "supportModify": true,
+      "defaultOptions": [
+        {
+          "code": "100116",
+          "name": "巨无霸酱",
+          "defaultQuantity": 1,
+          "maxQuantity": 1,
+          "minQuantity": 0
+        },
+        {
+          "code": "100141",
+          "name": "吉士",
+          "defaultQuantity": 1,
+          "maxQuantity": 1,
+          "minQuantity": 0
+        },
+        {
+          "code": "100168",
+          "name": "生菜",
+          "defaultQuantity": 1,
+          "maxQuantity": 1,
+          "minQuantity": 0
+        },
+        {
+          "code": "100202",
+          "name": "酸黄瓜",
+          "defaultQuantity": 1,
+          "maxQuantity": 1,
+          "minQuantity": 0
+        },
+        {
+          "code": "100212",
+          "name": "洋葱粒",
+          "defaultQuantity": 1,
+          "maxQuantity": 1,
+          "minQuantity": 0
+        }
+      ],
+      "rounds": []
+    },
+    {
+      "code": "1120",
+      "name": "双层吉士汉堡",
+      "supportModify": true,
+      "defaultOptions": [
+        {
+          "code": "100141",
+          "name": "吉士",
+          "defaultQuantity": 1,
+          "maxQuantity": 1,
+          "minQuantity": 0
+        },
+        {
+          "code": "100202",
+          "name": "酸黄瓜",
+          "defaultQuantity": 1,
+          "maxQuantity": 1,
+          "minQuantity": 0
+        },
+        {
+          "code": "100212",
+          "name": "洋葱粒",
+          "defaultQuantity": 1,
+          "maxQuantity": 1,
+          "minQuantity": 0
+        },
+        {
+          "code": "100214",
+          "name": "番茄酱",
+          "defaultQuantity": 1,
+          "maxQuantity": 1,
+          "minQuantity": 0
+        },
+        {
+          "code": "102230",
+          "name": "芥末酱",
+          "defaultQuantity": 1,
+          "maxQuantity": 1,
+          "minQuantity": 0
+        }
+      ],
+      "rounds": []
+    },
+    {
+      "code": "511782",
+      "name": "芝士安格斯厚牛堡",
+      "supportModify": true,
+      "defaultOptions": [
+        {
+          "code": "100201",
+          "name": "醇香芝士风味酱",
+          "defaultQuantity": 1,
+          "maxQuantity": 1,
+          "minQuantity": 0
+        },
+        {
+          "code": "102215",
+          "name": "高达干酪片",
+          "defaultQuantity": 1,
+          "maxQuantity": 1,
+          "minQuantity": 0
+        },
+        {
+          "code": "102225",
+          "name": "番茄片",
+          "defaultQuantity": 1,
+          "maxQuantity": 1,
+          "minQuantity": 0
+        },
+        {
+          "code": "120160",
+          "name": "黄油",
+          "defaultQuantity": 1,
+          "maxQuantity": 1,
+          "minQuantity": 0
+        }
+      ],
+      "rounds": []
+    },
+    {
+      "code": "1450",
+      "name": "麦香鸡",
+      "supportModify": true,
+      "defaultOptions": [
+        {
+          "code": "100136",
+          "name": "麦香鸡酱",
+          "defaultQuantity": 1,
+          "maxQuantity": 1,
+          "minQuantity": 0
+        },
+        {
+          "code": "100168",
+          "name": "生菜",
+          "defaultQuantity": 1,
+          "maxQuantity": 1,
+          "minQuantity": 0
+        }
+      ],
+      "rounds": []
+    },
+    {
+      "code": "1440",
+      "name": "麦辣鸡腿汉堡",
+      "supportModify": true,
+      "defaultOptions": [
+        {
+          "code": "100136",
+          "name": "麦香鸡酱",
+          "defaultQuantity": 1,
+          "maxQuantity": 1,
+          "minQuantity": 0
+        },
+        {
+          "code": "120512",
+          "name": "切块生菜",
+          "defaultQuantity": 1,
+          "maxQuantity": 1,
+          "minQuantity": 0
+        }
+      ],
+      "rounds": []
+    },
+    {
+      "code": "1406",
+      "name": "板烧鸡腿堡",
+      "supportModify": true,
+      "defaultOptions": [
+        {
+          "code": "102201",
+          "name": "烤味酱",
+          "defaultQuantity": 1,
+          "maxQuantity": 1,
+          "minQuantity": 0
+        },
+        {
+          "code": "120512",
+          "name": "切块生菜",
+          "defaultQuantity": 1,
+          "maxQuantity": 1,
+          "minQuantity": 0
+        }
+      ],
+      "rounds": []
+    },
+    {
+      "code": "1600",
+      "name": "麦香鱼",
+      "supportModify": true,
+      "defaultOptions": [
+        {
+          "code": "100126",
+          "name": "麦香鱼酱",
+          "defaultQuantity": 1,
+          "maxQuantity": 1,
+          "minQuantity": 0
+        },
+        {
+          "code": "100141",
+          "name": "吉士",
+          "defaultQuantity": 1,
+          "maxQuantity": 1,
+          "minQuantity": 0
+        }
+      ],
+      "rounds": []
+    },
+    {
+      "code": "9900003586",
+      "name": "双层深海鳕鱼堡",
+      "supportModify": false,
+      "defaultOptions": [],
+      "rounds": [
+        {
+          "id": 1,
+          "name": "选择双层深海鳕鱼堡",
+          "minQuantity": 1,
+          "maxQuantity": 1,
+          "choices": [
+            {
+              "code": "520312",
+              "name": "原味双层深海鳕鱼堡",
+              "isDefault": 1,
+              "diffPrice": "+ ¥0",
+              "supportModify": true,
+              "defaultOptions": [
+                {
+                  "code": "100126",
+                  "name": "麦香鱼酱",
+                  "defaultQuantity": 1,
+                  "maxQuantity": 1,
+                  "minQuantity": 0
+                },
+                {
+                  "code": "100141",
+                  "name": "吉士",
+                  "defaultQuantity": 1,
+                  "maxQuantity": 1,
+                  "minQuantity": 0
+                }
+              ]
+            },
+            {
+              "code": "8317",
+              "name": "风味双层深海鳕鱼堡",
+              "isDefault": 0,
+              "diffPrice": "+ ¥0",
+              "supportModify": true,
+              "defaultOptions": [
+                {
+                  "code": "103399",
+                  "name": "芥末酱",
+                  "defaultQuantity": 1,
+                  "maxQuantity": 1,
+                  "minQuantity": 0
+                },
+                {
+                  "code": "100141",
+                  "name": "吉士",
+                  "defaultQuantity": 1,
+                  "maxQuantity": 1,
+                  "minQuantity": 0
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "1401",
+      "name": "麦乐鸡5块",
+      "supportModify": false,
+      "defaultOptions": [],
+      "rounds": []
+    },
+    {
+      "code": "1700",
+      "name": "麦辣鸡翅2块",
+      "supportModify": false,
+      "defaultOptions": [],
+      "rounds": []
+    },
+    {
+      "code": "4810",
+      "name": "中薯条",
+      "supportModify": false,
+      "defaultOptions": [],
+      "rounds": []
+    },
+    {
+      "code": "9900008747",
+      "name": "牛肉堡单品精选",
+      "supportModify": false,
+      "defaultOptions": [],
+      "rounds": [
+        {
+          "id": 1,
+          "name": "选择汉堡",
+          "minQuantity": 1,
+          "maxQuantity": 1,
+          "choices": [
+            {
+              "code": "1000",
+              "name": "汉堡包",
+              "isDefault": 1,
+              "diffPrice": "+ ¥0",
+              "supportModify": true,
+              "defaultOptions": [
+                {
+                  "code": "100202",
+                  "name": "酸黄瓜",
+                  "defaultQuantity": 1,
+                  "maxQuantity": 1,
+                  "minQuantity": 0
+                },
+                {
+                  "code": "100212",
+                  "name": "洋葱粒",
+                  "defaultQuantity": 1,
+                  "maxQuantity": 1,
+                  "minQuantity": 0
+                },
+                {
+                  "code": "100214",
+                  "name": "番茄酱",
+                  "defaultQuantity": 1,
+                  "maxQuantity": 1,
+                  "minQuantity": 0
+                },
+                {
+                  "code": "102230",
+                  "name": "芥末酱",
+                  "defaultQuantity": 1,
+                  "maxQuantity": 1,
+                  "minQuantity": 0
+                }
+              ]
+            },
+            {
+              "code": "1010",
+              "name": "吉士汉堡包",
+              "isDefault": 0,
+              "diffPrice": "+ ¥1",
+              "supportModify": true,
+              "defaultOptions": [
+                {
+                  "code": "100202",
+                  "name": "酸黄瓜",
+                  "defaultQuantity": 1,
+                  "maxQuantity": 1,
+                  "minQuantity": 0
+                },
+                {
+                  "code": "100212",
+                  "name": "洋葱粒",
+                  "defaultQuantity": 1,
+                  "maxQuantity": 1,
+                  "minQuantity": 0
+                },
+                {
+                  "code": "100214",
+                  "name": "番茄酱",
+                  "defaultQuantity": 1,
+                  "maxQuantity": 1,
+                  "minQuantity": 0
+                },
+                {
+                  "code": "102230",
+                  "name": "芥末酱",
+                  "defaultQuantity": 1,
+                  "maxQuantity": 1,
+                  "minQuantity": 0
+                }
+              ]
+            },
+            {
+              "code": "520551",
+              "name": "培根芝士双牛堡",
+              "isDefault": 0,
+              "diffPrice": "+ ¥11",
+              "supportModify": true,
+              "defaultOptions": [
+                {
+                  "code": "100179",
+                  "name": "烤牛肉风味酱",
+                  "defaultQuantity": 1,
+                  "maxQuantity": 1,
+                  "minQuantity": 0
+                },
+                {
+                  "code": "100141",
+                  "name": "吉士",
+                  "defaultQuantity": 1,
+                  "maxQuantity": 1,
+                  "minQuantity": 0
+                },
+                {
+                  "code": "103386",
+                  "name": "培根",
+                  "defaultQuantity": 1,
+                  "maxQuantity": 1,
+                  "minQuantity": 0
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "code": "521986",
+      "name": "马苏里拉拉丝芝士条",
+      "supportModify": false,
+      "defaultOptions": [],
+      "rounds": []
+    }
+  ],
+  "priceCheckStoreCode": "1450713",
+  "priceChecks": [
+    {
+      "name": "巨无霸",
+      "productCode": "1100",
+      "code": 200,
+      "message": "请求成功",
+      "totalYuan": 25.5,
+      "products": [
+        {
+          "code": "1100",
+          "name": "巨无霸",
+          "quantity": 1
+        }
+      ],
+      "takeWays": [
+        "外带"
+      ],
+      "item": {
+        "productCode": "1100",
+        "quantity": 1,
+        "modification": {
+          "values": [
+            {
+              "code": "100116",
+              "key": "0-1",
+              "quantity": 1
+            },
+            {
+              "code": "100141",
+              "key": "0-1",
+              "quantity": 1
+            },
+            {
+              "code": "100168",
+              "key": "0-1",
+              "quantity": 1
+            },
+            {
+              "code": "100202",
+              "key": "0-1",
+              "quantity": 1
+            },
+            {
+              "code": "100212",
+              "key": "0-1",
+              "quantity": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "双层吉士汉堡",
+      "productCode": "1120",
+      "code": 200,
+      "message": "请求成功",
+      "totalYuan": 23,
+      "products": [
+        {
+          "code": "1120",
+          "name": "双层吉士汉堡",
+          "quantity": 1
+        }
+      ],
+      "takeWays": [
+        "外带"
+      ],
+      "item": {
+        "productCode": "1120",
+        "quantity": 1,
+        "modification": {
+          "values": [
+            {
+              "code": "100141",
+              "key": "0-1",
+              "quantity": 1
+            },
+            {
+              "code": "100202",
+              "key": "0-1",
+              "quantity": 1
+            },
+            {
+              "code": "100212",
+              "key": "0-1",
+              "quantity": 1
+            },
+            {
+              "code": "100214",
+              "key": "0-1",
+              "quantity": 1
+            },
+            {
+              "code": "102230",
+              "key": "0-1",
+              "quantity": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "芝士安格斯厚牛堡",
+      "productCode": "511782",
+      "code": 200,
+      "message": "请求成功",
+      "totalYuan": 31.5,
+      "products": [
+        {
+          "code": "511782",
+          "name": "芝士安格斯厚牛堡",
+          "quantity": 1
+        }
+      ],
+      "takeWays": [
+        "外带"
+      ],
+      "item": {
+        "productCode": "511782",
+        "quantity": 1,
+        "modification": {
+          "values": [
+            {
+              "code": "100201",
+              "key": "0-1",
+              "quantity": 1
+            },
+            {
+              "code": "102215",
+              "key": "0-1",
+              "quantity": 1
+            },
+            {
+              "code": "102225",
+              "key": "0-1",
+              "quantity": 1
+            },
+            {
+              "code": "120160",
+              "key": "0-1",
+              "quantity": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "麦香鸡",
+      "productCode": "1450",
+      "code": 200,
+      "message": "请求成功",
+      "totalYuan": 17,
+      "products": [
+        {
+          "code": "1450",
+          "name": "麦香鸡",
+          "quantity": 1
+        }
+      ],
+      "takeWays": [
+        "外带"
+      ],
+      "item": {
+        "productCode": "1450",
+        "quantity": 1,
+        "modification": {
+          "values": [
+            {
+              "code": "100136",
+              "key": "0-1",
+              "quantity": 1
+            },
+            {
+              "code": "100168",
+              "key": "0-1",
+              "quantity": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "麦辣鸡腿汉堡",
+      "productCode": "1440",
+      "code": 200,
+      "message": "请求成功",
+      "totalYuan": 22.5,
+      "products": [
+        {
+          "code": "1440",
+          "name": "麦辣鸡腿汉堡",
+          "quantity": 1
+        }
+      ],
+      "takeWays": [
+        "外带"
+      ],
+      "item": {
+        "productCode": "1440",
+        "quantity": 1,
+        "modification": {
+          "values": [
+            {
+              "code": "100136",
+              "key": "0-1",
+              "quantity": 1
+            },
+            {
+              "code": "120512",
+              "key": "0-1",
+              "quantity": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "板烧鸡腿堡",
+      "productCode": "1406",
+      "code": 200,
+      "message": "请求成功",
+      "totalYuan": 23.5,
+      "products": [
+        {
+          "code": "1406",
+          "name": "板烧鸡腿堡",
+          "quantity": 1
+        }
+      ],
+      "takeWays": [
+        "外带"
+      ],
+      "item": {
+        "productCode": "1406",
+        "quantity": 1,
+        "modification": {
+          "values": [
+            {
+              "code": "102201",
+              "key": "0-1",
+              "quantity": 1
+            },
+            {
+              "code": "120512",
+              "key": "0-1",
+              "quantity": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "麦香鱼",
+      "productCode": "1600",
+      "code": 200,
+      "message": "请求成功",
+      "totalYuan": 22.5,
+      "products": [
+        {
+          "code": "1600",
+          "name": "麦香鱼",
+          "quantity": 1
+        }
+      ],
+      "takeWays": [
+        "外带"
+      ],
+      "item": {
+        "productCode": "1600",
+        "quantity": 1,
+        "modification": {
+          "values": [
+            {
+              "code": "100126",
+              "key": "0-1",
+              "quantity": 1
+            },
+            {
+              "code": "100141",
+              "key": "0-1",
+              "quantity": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "麦乐鸡5块",
+      "productCode": "1401",
+      "code": 200,
+      "message": "请求成功",
+      "totalYuan": 14,
+      "products": [
+        {
+          "code": "1401",
+          "name": "麦乐鸡5块",
+          "quantity": 1
+        }
+      ],
+      "takeWays": [
+        "外带"
+      ],
+      "item": {
+        "productCode": "1401",
+        "quantity": 1
+      }
+    },
+    {
+      "name": "麦辣鸡翅2块",
+      "productCode": "1700",
+      "code": 200,
+      "message": "请求成功",
+      "totalYuan": 15,
+      "products": [
+        {
+          "code": "1700",
+          "name": "麦辣鸡翅2块",
+          "quantity": 1
+        }
+      ],
+      "takeWays": [
+        "外带"
+      ],
+      "item": {
+        "productCode": "1700",
+        "quantity": 1
+      }
+    },
+    {
+      "name": "中薯条",
+      "productCode": "4810",
+      "code": 200,
+      "message": "请求成功",
+      "totalYuan": 13.5,
+      "products": [
+        {
+          "code": "4810",
+          "name": "中薯条",
+          "quantity": 1
+        }
+      ],
+      "takeWays": [
+        "外带"
+      ],
+      "item": {
+        "productCode": "4810",
+        "quantity": 1
+      }
+    },
+    {
+      "name": "马苏里拉拉丝芝士条",
+      "productCode": "521986",
+      "code": 200,
+      "message": "请求成功",
+      "totalYuan": 11,
+      "products": [
+        {
+          "code": "521986",
+          "name": "马苏里拉拉丝芝士条",
+          "quantity": 1
+        }
+      ],
+      "takeWays": [
+        "外带"
+      ],
+      "item": {
+        "productCode": "521986",
+        "quantity": 1
+      }
+    },
+    {
+      "name": "汉堡包",
+      "productCode": "9900008747",
+      "code": 200,
+      "message": "请求成功",
+      "totalYuan": 14,
+      "products": [
+        {
+          "code": "9900008747",
+          "name": "牛肉堡单品精选",
+          "quantity": 1
+        }
+      ],
+      "takeWays": [
+        "外带"
+      ],
+      "item": {
+        "productCode": "9900008747",
+        "quantity": 1,
+        "roundList": [
+          {
+            "round": "1",
+            "comboItemList": [
+              {
+                "code": "1000",
+                "quantity": 1,
+                "modification": {
+                  "values": [
+                    {
+                      "code": "100202",
+                      "key": "0-1",
+                      "quantity": 1
+                    },
+                    {
+                      "code": "100212",
+                      "key": "0-1",
+                      "quantity": 1
+                    },
+                    {
+                      "code": "100214",
+                      "key": "0-1",
+                      "quantity": 1
+                    },
+                    {
+                      "code": "102230",
+                      "key": "0-1",
+                      "quantity": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "吉士汉堡包",
+      "productCode": "9900008747",
+      "code": 200,
+      "message": "请求成功",
+      "totalYuan": 15,
+      "products": [
+        {
+          "code": "9900008747",
+          "name": "牛肉堡单品精选",
+          "quantity": 1
+        }
+      ],
+      "takeWays": [
+        "外带"
+      ],
+      "item": {
+        "productCode": "9900008747",
+        "quantity": 1,
+        "roundList": [
+          {
+            "round": "1",
+            "comboItemList": [
+              {
+                "code": "1010",
+                "quantity": 1,
+                "modification": {
+                  "values": [
+                    {
+                      "code": "100202",
+                      "key": "0-1",
+                      "quantity": 1
+                    },
+                    {
+                      "code": "100212",
+                      "key": "0-1",
+                      "quantity": 1
+                    },
+                    {
+                      "code": "100214",
+                      "key": "0-1",
+                      "quantity": 1
+                    },
+                    {
+                      "code": "102230",
+                      "key": "0-1",
+                      "quantity": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "原味双层深海鳕鱼堡",
+      "productCode": "9900003586",
+      "code": 200,
+      "message": "请求成功",
+      "totalYuan": 24,
+      "products": [
+        {
+          "code": "9900003586",
+          "name": "双层深海鳕鱼堡",
+          "quantity": 1
+        }
+      ],
+      "takeWays": [
+        "外带"
+      ],
+      "item": {
+        "productCode": "9900003586",
+        "quantity": 1,
+        "roundList": [
+          {
+            "round": "1",
+            "comboItemList": [
+              {
+                "code": "520312",
+                "quantity": 1,
+                "modification": {
+                  "values": [
+                    {
+                      "code": "100126",
+                      "key": "0-1",
+                      "quantity": 1
+                    },
+                    {
+                      "code": "100141",
+                      "key": "0-1",
+                      "quantity": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

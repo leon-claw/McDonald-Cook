@@ -47,11 +47,7 @@ export function parseTakeWays(raw: unknown): TakeWay[] {
     return { code: string(item.code), title: string(item.title), subtitle: typeof item.subtitle === 'string' ? item.subtitle : undefined };
   });
 }
-// The game orders a standard single item. Never silently choose a meal's components.
-export function standardItem(raw: unknown, productId: string) {
-  const detail = object(object(raw).data);
-  if (detail.code !== productId) throw new ApiError(502, '餐品详情与所选商品不一致。', 'MCP_RESPONSE_ERROR');
-  if (!Array.isArray(detail.rounds) || detail.rounds.length > 0) throw new ApiError(409, '该餐品需要选配，请选择对应的单品。', 'PRODUCT_REQUIRES_CHOICES');
+function defaultModification(detail: Record<string, unknown>) {
   const values: { code: string; key: string; quantity: number }[] = [];
   if (detail.modification) {
     const groups = object(detail.modification).items;
@@ -60,16 +56,45 @@ export function standardItem(raw: unknown, productId: string) {
       const options = object(group).values;
       if (!Array.isArray(options)) throw new ApiError(502, '无法读取餐品的标准配方。', 'MCP_RESPONSE_ERROR');
       for (const option of options) {
-        const value = object(option);
-        const quantity = value.selectedQuantity;
-        if (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity < 0) throw new ApiError(502, '餐品的默认配方不完整。', 'MCP_RESPONSE_ERROR');
+        const value = object(option), quantity = value.selectedQuantity;
+        if (typeof quantity !== 'number' || !Number.isInteger(quantity) || quantity < 0
+          || (typeof value.minQuantity === 'number' && quantity < value.minQuantity)
+          || (typeof value.maxQuantity === 'number' && value.maxQuantity >= 0 && quantity > value.maxQuantity)) {
+          throw new ApiError(502, '餐品的默认配方不完整。', 'MCP_RESPONSE_ERROR');
+        }
         const key = quantity > 0 ? value.selectedKey : value.unselectedKey;
         if (quantity > 0 || key) values.push({ code: string(value.code), key: string(key), quantity });
       }
     }
   }
-  return {
-    name: string(detail.name), supportModify: detail.supportModify === true,
-    item: { productCode: productId, quantity: 1, ...(values.length ? { modification: { values } } : {}) },
-  };
+  return values.length ? { modification: { values } } : {};
+}
+export function singleChoiceRound(detail: Record<string, unknown>) {
+  if (!Array.isArray(detail.rounds) || detail.rounds.length !== 1) {
+    throw new ApiError(409, '该餐品需要选配，请选择对应的单品。', 'PRODUCT_REQUIRES_CHOICES');
+  }
+  const round = object(detail.rounds[0]);
+  if (round.minQuantity !== 1 || round.maxQuantity !== 1 || !Array.isArray(round.choices)
+    || !['string', 'number'].includes(typeof round.id) || !String(round.id)) {
+    throw new ApiError(409, '该餐品需要选配，请选择对应的单品。', 'PRODUCT_REQUIRES_CHOICES');
+  }
+  return { id: String(round.id), choices: round.choices.map(object) };
+}
+// Only one standard item, or one explicitly selected child of a one-choice single item.
+export function standardItem(raw: unknown, productId: string, choice?: { round: string; code: string }) {
+  const detail = object(object(raw).data);
+  if (detail.code !== productId) throw new ApiError(502, '餐品详情与所选商品不一致。', 'MCP_RESPONSE_ERROR');
+  if (choice) {
+    const round = singleChoiceRound(detail);
+    const selected = round.choices.find(value => value.code === choice.code);
+    if (round.id !== choice.round || !selected || (Array.isArray(selected.rounds) && selected.rounds.length)) {
+      throw new ApiError(409, '所选餐品款式已不可用，请重新烹饪。', 'PRODUCT_UNAVAILABLE');
+    }
+    return { name: string(selected.name), supportModify: selected.supportModify === true,
+      item: { productCode: productId, quantity: 1, ...defaultModification(detail),
+        roundList: [{ round: round.id, comboItemList: [{ code: choice.code, quantity: 1, ...defaultModification(selected) }] }] } };
+  }
+  if (!Array.isArray(detail.rounds) || detail.rounds.length > 0) throw new ApiError(409, '该餐品需要选配，请选择对应的单品。', 'PRODUCT_REQUIRES_CHOICES');
+  return { name: string(detail.name), supportModify: detail.supportModify === true,
+    item: { productCode: productId, quantity: 1, ...defaultModification(detail) } };
 }

@@ -1,0 +1,191 @@
+{
+  "game": "The Legend of Zelda: Breath of the Wild",
+  "updated": "2026-10-24",
+  "sources": {
+    "sound_effects": "https://sounds.spriters-resource.com/nintendo_switch/thelegendofzeldabreathofthewild/",
+    "full_soundtrack": "https://downloads.khinsider.com/game-soundtracks/album/legend-of-zelda-the-breath-of-the-wild-original-soundtrack-limited-edition",
+    "music_selection_24": "https://www.zeldaxtreme.com/soundtracks/breath-of-the-wild/",
+    "original_link_and_fanfare_samples": "https://noproblo.dayjo.org/zeldasounds/",
+    "link_and_wolf_link_voices": "https://sounds.spriters-resource.com/nintendo_switch/thelegendofzeldabreathofthewild/asset/405764/"
+  },
+  "existing_samples": {
+    "botw_link_wav": 122,
+    "botw_fanfares_wav": 5
+  },
+  "new_effect_packs": {
+    "botw_sfx/misc_2": {
+      "archive": "405754.zip",
+      "archive_sha256": "89f95403a3301110f35f3e05d0b0d4dd3c4a47a0a0975ba7d968675ed05c7a57",
+      "destination": "botw_sfx/misc_2",
+      "files": 1014,
+      "extensions": {
+        ".wav": 926,
+        ".txt": 88
+      },
+      "bytes": 130989713,
+      "crc": "passed"
+    },
+    "botw_sfx/misc_3": {
+      "archive": "427837.zip",
+      "archive_sha256": "72b7d7d8ebce05b4f4267f8f6196cf75a1863b1fbb171dc1afdd913a7df513e5",
+      "destination": "botw_sfx/misc_3",
+      "files": 97,
+      "extensions": {
+        ".wav": 94,
+        ".txt": 3
+      },
+      "bytes": 148283083,
+      "crc": "passed"
+    },
+    "botw_sfx/terrain_1": {
+      "archive": "405755.zip",
+      "archive_sha256": "b68853b7149aed8f291bd28d10c0f3280ef64010ae4d0c998b2441915d134ea2",
+      "destination": "botw_sfx/terrain_1",
+      "files": 2266,
+      "extensions": {
+        ".wav": 1977,
+        ".txt": 289
+      },
+      "bytes": 127804537,
+      "crc": "passed"
+    },
+    "botw_sfx/terrain_2": {
+      "archive": "405756.zip",
+      "archive_sha256": "7e4627ecb2dfb88ceca6ebe264dc2283a56f016386b7d5f09b18550b55afbb9e",
+      "destination": "botw_sfx/terrain_2",
+      "files": 2119,
+      "extensions": {
+        ".wav": 1848,
+        ".txt": 271
+      },
+      "bytes": 115194827,
+      "crc": "passed"
+    },
+    "botw_sfx/environment": {
+      "archive": "405751.zip",
+      "archive_sha256": "4d382fa60c02e84b0f3ff6483c4e2e149f5c29b26bba1d27dc6ee83d7095aa69",
+      "destination": "botw_sfx/environment",
+      "files": 333,
+      "extensions": {
+        ".wav": 261,
+        ".txt": 72
+      },
+      "bytes": 76488441,
+      "crc": "passed"
+    },
+    "botw_sfx/equipment": {
+      "archive": "405752.zip",
+      "archive_sha256": "8cea88cf932c0d4dd22dbd2cb02461eefa6317200408f1f0727b49d3816e9f14",
+      "destination": "botw_sfx/equipment",
+      "files": 644,
+      "extensions": {
+        ".wav": 581,
+        ".txt": 63
+      },
+      "bytes": 56688149,
+      "crc": "passed"
+    },
+    "botw_sfx/animals": {
+      "archive": "405747.zip",
+      "archive_sha256": "9f626e279a7167f0514983f9204a65f5cbdd115e986b2ae860001a2de07ef6bd",
+      "destination": "botw_sfx/animals",
+      "files": 694,
+      "extensions": {
+        ".wav": 676,
+        ".txt": 18
+      },
+      "bytes": 59231941,
+      "crc": "passed"
+    },
+    "botw_sfx/misc_1": {
+      "archive": "405753 (1).zip",
+      "archive_sha256": "664e6fa7d4ce001f62c78c7a7d12100354f4546e08db9d65fe924d9f1cef278f",
+      "destination": "botw_sfx/misc_1",
+      "files": 676,
+      "extensions": {
+        ".wav": 562,
+        ".txt": 114
+      },
+      "bytes": 143105015,
+      "crc": "passed"
+    },
+    "botw_music/selection_24": {
+      "archive": "botw-soundtrack.zip",
+      "archive_sha256": "d6b4f3c7c657c31a5d557e7a8a61c6f8cd6675f448e7b48c5dc80a888b6f671e",
+      "destination": "botw_music/selection_24",
+      "files": 24,
+      "extensions": {
+        ".mp3": 24
+      },
+      "bytes": 100934737,
+      "crc": "passed"
+    },
+    "botw_sfx/characters": {
+      "archive": "405748.zip",
+      "archive_sha256": "344a9a9904f50a352520da0ad6e309e4582d09f7c2156a55e85b849c4a28fcdf",
+      "destination": "botw_sfx/characters",
+      "files": 346,
+      "extensions": {
+        ".wav": 336,
+        ".txt": 10
+      },
+      "bytes": 64768103,
+      "crc": "passed"
+    },
+    "botw_sfx/enemies": {
+      "archive": "405749.zip",
+      "archive_sha256": "7acef8c92667eb15353c9bb256c2718bb311b760e901961d75f88bee2fffa410",
+      "destination": "botw_sfx/enemies",
+      "files": 1594,
+      "extensions": {
+        ".wav": 1520,
+        ".txt": 74
+      },
+      "bytes": 175196864,
+      "crc": "passed"
+    },
+    "botw_sfx/bosses": {
+      "archive": "405750.zip",
+      "archive_sha256": "fb67fd5117c09e2d3ca8eec88d805cb83aeb27176c2fa85f3799d25f884d0609",
+      "destination": "botw_sfx/bosses",
+      "files": 668,
+      "extensions": {
+        ".wav": 601,
+        ".txt": 67
+      },
+      "bytes": 177568670,
+      "crc": "passed"
+    }
+  },
+  "totals": {
+    "sound_effect_pack_wav": 9382,
+    "sound_effect_pack_loop_sidecar_txt": 1069,
+    "sound_effect_wav_readable": 9382,
+    "sound_effect_wav_duration_seconds": 11350.205,
+    "sound_effect_wav_unreadable": 0,
+    "full_ost_mp3": 211,
+    "selected_music_mp3": 24,
+    "all_mp3": 235,
+    "additional_voice_wav": 280,
+    "all_wav": 9789
+  },
+  "notes": [
+    "All 11 sound-effect archives were checked with ZIP CRC before extraction.",
+    "WAV assets were opened and parsed with Python wave.",
+    "MP3 tracks were probed with ffprobe; manifest records source, byte size, duration, and SHA-256.",
+    "TXT files are loop-region companion metadata from the source packs, not audio clips.",
+    "The 211-track album is the main five-disc soundtrack page; the 24-track selection is an additional compilation and may overlap it.",
+    "This inventory covers the 11 listed sound-effect packs and the 211-track main soundtrack; it does not claim every voice pack, bonus disc, Zelda game, or internal game audio event.",
+    "Additional Link & Wolf Link voice archive: 280 WAV files, CRC checked and WAV payloads verified; filenames preserved. PV618_00–02 are laughter candidates; exact cooking-success usage remains unconfirmed."
+  ],
+  "additional_voice_packs": {
+    "botw_sfx/voices_link": {
+      "wav": 280,
+      "player_voice_wav": 268,
+      "wolf_link_wav": 12,
+      "archive_sha256": "241722042c28272ce7c125df90ba9b5ee585f3ea70b229181bbae637686eb4b0",
+      "crc": "passed",
+      "wav_readable": 280
+    }
+  }
+}

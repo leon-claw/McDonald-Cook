@@ -1,9 +1,10 @@
+import { RECIPES } from '../src/game/data.js';
 import { readFile } from 'node:fs/promises';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import Ajv from 'ajv';
 import { ApiError, type Adapter, type Product, type Store, type TrustedQuote } from './types.js';
-import { object, parseStores, parseTakeWays, parseToolResult, standardItem } from './mcd-data.js';
+import { object, parseStores, parseTakeWays, parseToolResult, singleChoiceRound, standardItem } from './mcd-data.js';
 
 type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 interface Binding { name: string; arguments: Record<string, Json> }
@@ -15,8 +16,9 @@ interface Mapping {
   quote: Binding & { totalPath: string; priceScale?: number; takeWaysPath: string };
   createOrder: Binding & { orderIdPath: string; payUrlPath: string };
   catalogTags: Record<string, string>;
+  variantGroups?: string[];
 }
-const allowedTags = new Set(['big-mac', 'cheeseburger', 'double-beef', 'chicken', 'fish', 'spicy-chicken', 'fries', 'beef']);
+const allowedTags = new Set<string>(RECIPES.map(recipe => recipe.id));
 
 export function atPath(value: unknown, path: string): unknown {
   if (!path) return value;
@@ -72,6 +74,16 @@ export class McpAdapter implements Adapter {
   private validators = new Map<string, ReturnType<Ajv['compile']>>();
   private initPromise: Promise<void> | null = null;
   private knownStores = new Map<string, { store: Store; expires: number }>();
+  private catalogCache = new Map<string, { expires: number; catalog: import('./types.js').Catalog }>();
+  private detailCache = new Map<string, { expires: number; raw: unknown }>();
+  private async readDetail(storeCode: string, productId: string, refresh = false) {
+    const key = `${storeCode}:${productId}`, cached = this.detailCache.get(key);
+    if (!refresh && cached && cached.expires > Date.now()) return cached.raw;
+    const raw = await this.invoke(this.mapping!.detail, { storeCode, productId });
+    this.detailCache.set(key, { raw, expires: Date.now() + 45_000 });
+    while (this.detailCache.size > 500) this.detailCache.delete(this.detailCache.keys().next().value!);
+    return raw;
+  }
   constructor(private options: { url?: string; token?: string; mappingPath?: string; fetch?: typeof fetch }) {}
   private async init() {
     if (this.client) return;
@@ -140,12 +152,14 @@ export class McpAdapter implements Adapter {
     while (this.knownStores.size > 500) this.knownStores.delete(this.knownStores.keys().next().value!);
     return { mode: this.mode, stores };
   }
-  private async readCatalog(storeCode: string) {
+  private async readCatalog(storeCode: string, refresh = false) {
     if (!storeCode) throw new ApiError(400, '请输入取餐门店编码。', 'STORE_REQUIRED');
     await this.init();
     const selected = this.knownStores.get(storeCode);
     if (!selected || selected.expires <= Date.now()) throw new ApiError(400, '请先搜索并选择取餐门店。', 'STORE_REQUIRED');
     if (!selected.store.open) throw new ApiError(409, '当前门店暂停营业，请选择营业中的门店。', 'STORE_CLOSED');
+    const cached = this.catalogCache.get(storeCode);
+    if (!refresh && cached && cached.expires > Date.now()) return cached.catalog;
     const mapping = this.mapping!;
     const raw = await this.invoke(mapping.catalog, { storeCode, quantity: 1 });
     const mealMap = object(atPath(raw, mapping.catalog.productsPath));
@@ -157,30 +171,57 @@ export class McpAdapter implements Adapter {
     }));
     const items = [...codes].filter(code => Object.hasOwn(mealMap, code)).map(code => ({ ...object(mealMap[code]), code }));
     const products: Product[] = [];
-    const rawProducts = new Map<string, unknown>();
-    for (const item of items) {
-      const id = textField(item, mapping.catalog.idPath);
-      const name = textField(item, mapping.catalog.namePath);
-      const catalogTag = mapping.catalogTags[id] ?? mapping.catalogTags[name];
-      if (!catalogTag) continue;
-      const price = mapping.catalog.pricePath ? money(item, mapping.catalog.pricePath, mapping.catalog.priceScale) : null;
-      products.push({ id, name, price, catalogTag });
-      rawProducts.set(id, item);
+    // Limit concurrent detail queries; only published, supported single dishes are candidates.
+    const relevant = items.filter(item => mapping.catalogTags[textField(item, mapping.catalog.idPath)]
+      || mapping.catalogTags[textField(item, mapping.catalog.namePath)]
+      || mapping.variantGroups?.includes(textField(item, mapping.catalog.idPath))
+      || mapping.variantGroups?.includes(textField(item, mapping.catalog.namePath)));
+    for (let offset = 0; offset < relevant.length; offset += 4) {
+      const batch = await Promise.all(relevant.slice(offset, offset + 4).map(async item => {
+        const productCode = textField(item, mapping.catalog.idPath);
+        const rawDetail = await this.readDetail(storeCode, productCode);
+        const detail = object(object(rawDetail).data);
+        if (detail.code !== productCode) throw new ApiError(502, '餐品详情与菜单不一致。', 'MCP_RESPONSE_ERROR');
+        if (Array.isArray(detail.rounds) && detail.rounds.length) {
+          if (!mapping.variantGroups?.includes(productCode) && !mapping.variantGroups?.includes(String(detail.name))) return [];
+          const round = singleChoiceRound(detail);
+          return round.choices.flatMap(child => {
+            const catalogTag = mapping.catalogTags[String(child.name)];
+            if (!catalogTag) return [];
+            const choiceCode = textField(child, 'code');
+            const selected = standardItem(rawDetail, productCode, { round: round.id, code: choiceCode });
+            return [{ id: `${productCode}:${round.id}:${choiceCode}`, productCode, choiceCode, round: round.id,
+              name: selected.name, price: null, catalogTag, supportModify: selected.supportModify }];
+          });
+        }
+        const selected = standardItem(rawDetail, productCode);
+        // Exact names prevent a reused product code or a meal bundle from changing food families.
+        const catalogTag = mapping.catalogTags[selected.name];
+        if (!catalogTag) return [];
+        const price = mapping.catalog.pricePath ? money(item, mapping.catalog.pricePath, mapping.catalog.priceScale) : null;
+        return [{ id: productCode, productCode, name: selected.name, price, catalogTag, supportModify: selected.supportModify }];
+      }));
+      products.push(...batch.flat());
     }
-    return { catalog: { mode: this.mode, store: selected.store, products }, rawProducts };
+    const catalog = { mode: this.mode, store: selected.store, products };
+    this.catalogCache.set(storeCode, { catalog, expires: Date.now() + 45_000 });
+    while (this.catalogCache.size > 100) this.catalogCache.delete(this.catalogCache.keys().next().value!);
+    return catalog;
   }
-  async catalog(storeCode: string) { return (await this.readCatalog(storeCode)).catalog; }
+  async catalog(storeCode: string) { return this.readCatalog(storeCode); }
   async quote(productId: string, storeCode: string) {
-    const { catalog, rawProducts } = await this.readCatalog(storeCode);
+    const catalog = await this.readCatalog(storeCode, true);
     const product = catalog.products.find(item => item.id === productId);
-    if (!product) throw new ApiError(404, '该餐品在当前门店不可售，请重新选择。', 'PRODUCT_UNAVAILABLE');
-    const context = { storeCode, productId, quantity: 1, product: rawProducts.get(productId) };
-    const detail = standardItem(await this.invoke(this.mapping!.detail, context), productId);
-    product.name = detail.name;
+    if (!product) throw new ApiError(404, '该餐品在当前门店不可售，请重新烹饪。', 'PRODUCT_UNAVAILABLE');
+    const productCode = product.productCode!;
+    const context = { storeCode, productId: productCode, quantity: 1 };
+    const choice = product.choiceCode ? { code: product.choiceCode, round: product.round! } : undefined;
+    const detail = standardItem(await this.readDetail(storeCode, productCode, true), productCode, choice);
+    if (detail.name !== product.name) throw new ApiError(409, '餐品款式已变化，请重新烹饪。', 'PRODUCT_UNAVAILABLE');
     const items = [detail.item];
     const rawQuote = await this.invoke(this.mapping!.quote, { ...context, items });
     const priced = atPath(rawQuote, 'data.productList');
-    if (!Array.isArray(priced) || priced.length !== 1 || atPath(priced[0], 'productCode') !== productId || atPath(priced[0], 'quantity') !== 1) {
+    if (!Array.isArray(priced) || priced.length !== 1 || atPath(priced[0], 'productCode') !== productCode || atPath(priced[0], 'quantity') !== 1) {
       throw new ApiError(502, '算价返回的商品与所选餐品不一致。', 'MCP_RESPONSE_ERROR');
     }
     const total = money(rawQuote, this.mapping!.quote.totalPath, this.mapping!.quote.priceScale);

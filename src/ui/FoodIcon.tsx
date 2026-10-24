@@ -17,34 +17,43 @@ export function FoodIcon({ id, size = 96 }: { id: IngredientId; size?: number })
       {id === 'tomato' && <g stroke="#a44635" strokeWidth="2.5"><path d="M60 36c24-12 44 5 44 26 0 24-17 37-44 37-25 0-43-15-43-37 0-21 19-36 43-26Z" fill="#dd6950"/><path d="m60 43-20-8 15-4 8-16 3 18 19 1-15 11 2 11-12-8-13 6Z" fill="#6b994d" stroke="#51783e" strokeLinejoin="round"/><path d="M34 50c-6 4-8 10-7 16" stroke="#ff9e7c" strokeWidth="5" strokeLinecap="round"/></g>}
       {id === 'pickle' && <g stroke="#4f713d" strokeWidth="2.5"><path d="M28 86c-17-20-9-49 11-57C62 20 89 42 94 66c4 19-13 35-31 33-14 0-27-5-35-13Z" fill="#79a658"/><ellipse cx="58" cy="57" rx="21" ry="31" transform="rotate(-43 58 57)" fill="#c0ce7b"/><ellipse cx="58" cy="57" rx="12" ry="22" transform="rotate(-43 58 57)" fill="#dce29e" stroke="#abc06a"/><path d="m46 48 5 2m7 7 5 2m7 7 5 2" stroke="#8d9f56" strokeWidth="3" strokeLinecap="round"/><path d="m30 74 4 4m12 9 4 3m23 1 4-3" stroke="#557d3e" strokeWidth="3" strokeLinecap="round"/></g>}
       {id === 'chili' && <g stroke="#a44635" strokeWidth="2.5" strokeLinejoin="round"><path d="M42 34C22 48 39 69 64 78c16 7 25 9 35 14-3-15-18-25-25-41-6-16-20-23-32-17Z" fill="#d96543"/><path d="M45 36c-5-13 1-23 16-24l4 7c-12 0-15 6-13 16" fill="#6c9347" stroke="#57783c"/><path d="M43 48c-2 11 11 20 22 24" stroke="#fa9570" strokeWidth="5" strokeLinecap="round"/></g>}
+      {id === 'roast-sauce' && <g stroke="#704729" strokeWidth="3"><rect x="36" y="35" width="48" height="63" rx="12" fill="#a96c3c"/><rect x="44" y="22" width="32" height="17" rx="4" fill="#6d4d30"/><path d="M40 57h40v24H40z" fill="#eed7a2"/><path d="m52 75 5-10m7 10 5-10" stroke="#9e6734"/></g>}
       {id === 'fries' && <g stroke="#b77b35" strokeWidth="2" strokeLinejoin="round"><path d="m29 68-6-35 11-3 8 39m-3-5-1-43 12-1 3 45m3-2 6-43 12 2-5 44m6 1 12-35 10 4-11 36" fill="#f5ce69"/><path d="M23 58c14 11 57 12 74 0l-9 40H32Z" fill="#c45f43" stroke="#9d4a35"/><path d="M46 84c1-15 7-14 13 0 5-14 12-15 14 0" stroke="#ffdf7a" strokeWidth="4" strokeLinecap="round"/></g>}
     </svg>
   );
 }
 
-/** The journal shows the same three-bun, two-patty burger as the cooking reveal. */
-export function DishIcon({ size = 260 }: { recipe: Recipe; size?: number }) {
+/** Recipe illustrations use the same variant as the 3D reveal. */
+export function DishIcon({ recipe, size = 260 }: { recipe: Recipe; size?: number }) {
+  const id = recipe.modelVariant;
   const uid = useId().replaceAll(':', '');
-  return (
-    <svg width={size} height={size * .8} viewBox="0 0 300 240" fill="none" aria-hidden="true" className="dish-icon">
-      <defs><linearGradient id={`bun-${uid}`} x1="113" y1="42" x2="173" y2="110" gradientUnits="userSpaceOnUse"><stop stopColor="#ffe3a0"/><stop offset="1" stopColor="#d9984f"/></linearGradient><linearGradient id={`base-${uid}`} x1="150" y1="172" x2="150" y2="208" gradientUnits="userSpaceOnUse"><stop stopColor="#f1c478"/><stop offset="1" stopColor="#c58b47"/></linearGradient></defs>
-      <ellipse cx="150" cy="216" rx="109" ry="12" fill="#18382c" opacity=".13"/>
-      <path d="M32 199c32 20 205 20 236 0l-9 13c-38 20-180 20-218 0Z" fill="#dbd8bd"/>
-      <ellipse cx="150" cy="198" rx="118" ry="17" fill="#fff5d5" stroke="#dfd4b5" strokeWidth="2"/>
-      <g strokeLinejoin="round" strokeLinecap="round">
-        <path d="M56 173h188l-8 23c-11 22-163 21-175 1Z" fill={`url(#base-${uid})`} stroke="#b28143" strokeWidth="3"/>
-        <path d="M54 169c14-10 21 9 34 2 18-12 26 7 41 0 14-10 21 10 39 0 16-10 25 7 38 0 15-8 25-3 39 3l-8 14c-15 10-22-7-38 1-16 8-25-7-40 1-17 10-22-7-37 0-18 9-25-8-40 1-13 8-22-3-28-9Z" fill="#81a953" stroke="#5c7f3f" strokeWidth="3"/>
-        <path d="M55 151c13-15 175-15 190 0v14c-17 16-170 18-190 0Z" fill="#754632" stroke="#573927" strokeWidth="3"/>
-        <path d="m52 147 47 5 27 14 27-15 57 7 37-15-30-7-129-2Z" fill="#f8d464" stroke="#cca33d" strokeWidth="2"/>
-        <path d="M55 128c29-8 154-8 190 0v14c-24 10-165 10-189 0Z" fill="#e6b66e" stroke="#b28143" strokeWidth="3"/>
-        <path d="M57 114c15-18 172-18 186 0v13c-22 18-167 20-186-1Z" fill="#805139" stroke="#593c2c" strokeWidth="3"/>
-        <path d="m70 119 9 3m17-9 9 4m20 6 9 3m24-9 11 4m27-7 9 4m14 4 9-4" stroke="#a0734b" strokeWidth="4"/>
-        <path d="M52 105c10-10 17 5 26-3 13-10 26 6 38 0 11-10 20 7 33-1 18-11 28 8 43 0 15-9 26 6 36-2 9-5 17-2 20 6l-9 10c-16 8-20-7-35 1-19 9-21-6-38 2-16 8-24-6-37 0-17 10-20-9-36 0-17 10-23-5-35-1Z" fill="#98bc63" stroke="#6e914b" strokeWidth="3"/>
-        <ellipse cx="114" cy="106" rx="24" ry="6" fill="#b0be69" stroke="#768b43" strokeWidth="2"/>
-        <ellipse cx="183" cy="106" rx="24" ry="6" fill="#b0be69" stroke="#768b43" strokeWidth="2"/>
-        <path d="M50 100c0-45 39-66 101-66 61 0 98 23 99 66-32 16-166 16-200 0Z" fill={`url(#bun-${uid})`} stroke="#ad793c" strokeWidth="3"/>
-        <g stroke="#fff3c9" strokeWidth="5"><path d="m92 72 6-4m29-12 4-6m33 11 7 2m25 11 5-3m-81 22 7-3m36 2 5-4m49 6 5 3"/></g>
-      </g>
-    </svg>
-  );
+  if (id === 'fries') return <FoodIcon id="fries" size={size}/>;
+  const big = id === 'big-mac', fish = id === 'fish' || id === 'double-fish';
+  const double = big || id === 'double-beef' || id === 'double-fish';
+  const chicken = ['chicken','spicy-chicken','grilled-chicken'].includes(id);
+  const cheese = ['cheeseburger','double-beef','big-mac','angus','fish','double-fish'].includes(id);
+  const patty = fish ? '#d9a348' : chicken ? id === 'grilled-chicken' ? '#9c602f' : '#cf8b37' : '#754632';
+  return <svg width={size} height={size * .8} viewBox="0 0 300 240" fill="none" aria-hidden="true" className="dish-icon">
+    <defs><linearGradient id={`bun-${uid}`} x1="110" y1="40" x2="170" y2="140" gradientUnits="userSpaceOnUse"><stop stopColor="#ffe3a0"/><stop offset="1" stopColor="#d9984f"/></linearGradient></defs>
+    <ellipse cx="150" cy="214" rx="112" ry="12" fill="#18382c" opacity=".13"/>
+    <path d="M30 183h240l-15 28H45Z" fill="#f5e5bb" stroke="#cbb68c" strokeWidth="3"/>
+    {recipe.kind === 'burger' ? <g strokeLinejoin="round" strokeLinecap="round" strokeWidth="3">
+      <path d="M55 173h190l-8 23c-14 20-163 20-175 0Z" fill={`url(#bun-${uid})`} stroke="#ad793c"/>
+      <rect x="51" y="148" width="198" height="30" rx={fish?5:16} fill={patty} stroke="#916131"/>
+      {cheese&&<path d="m51 146 50 7 28 20 27-16 55 5 37-17-35-9H80Z" fill="#f4c745" stroke="#c69837"/>}
+      {big&&<rect x="54" y="125" width="192" height="21" rx="9" fill="#eab875" stroke="#ad793c"/>}
+      {double&&<rect x="51" y={big?101:118} width="198" height="26" rx={fish?5:14} fill={patty} stroke="#916131"/>}
+      {id==='angus'&&<rect x="55" y="130" width="190" height="15" rx="8" fill="#df6541" stroke="#b54930"/>}
+      {(big||chicken||id==='angus')&&<path d={`M50 ${big?104:130}q15-13 30-1t30 0t30 0t30 0t30 0t30 0l17 7-6 11q-17-10-32 0t-30 0t-30 0t-30 0t-30 0t-32-2Z`} fill="#91b958" stroke="#65883e"/>}
+      <path d={big?'M50 98c0-44 39-66 100-66s100 22 100 66c-32 16-168 16-200 0Z':double?'M50 115c0-44 39-66 100-66s100 22 100 66c-32 16-168 16-200 0Z':'M50 136c0-44 39-66 100-66s100 22 100 66c-32 16-168 16-200 0Z'} fill={`url(#bun-${uid})`} stroke="#ad793c"/>
+      {(big||chicken||id==='angus')&&<g transform={`translate(0 ${big?0:double?17:38})`} stroke="#fff3c9" strokeWidth="5"><path d="m92 72 6-4m29-12 4-6m33 11 7 2m25 11 5-3m-81 22 7-3m36 2 5-4m49 6 5 3"/></g>}
+    </g> : id === 'cheese-sticks' ? <g stroke="#aa7535" strokeWidth="3">
+      {[0,1,2].map(i=><rect key={i} x={65+i*52} y="80" width="38" height="111" rx="15" fill="#e0b05a" transform={`rotate(${i*6-6} ${84+i*52} 135)`}/>)}
+      <path d="M105 80q42-36 67-31" stroke="#fff2bf" strokeWidth="8"/><rect x="166" y="24" width="53" height="36" rx="12" fill="#dfac52"/>
+    </g> : <g stroke="#ac7536" strokeWidth="3">
+      {(id==='wings'?[0,1]:[0,1,2,3,4]).map(i=><g key={i} transform={`translate(${id==='wings'?85+i*110:75+(i%3)*70} ${id==='wings'?140:120+Math.floor(i/3)*47}) rotate(${i*27-14})`}>
+        <ellipse rx={id==='wings'?42:37} ry={id==='wings'?59:28} fill={id==='wings'?'#c4873c':'#e0b15e'}/><path d="m-15-12 9 3m7 15 7-4m-20 12 6 3" stroke="#f6ce78" strokeWidth="5"/>
+      </g>)}
+    </g>}
+  </svg>;
 }

@@ -3,12 +3,16 @@ import { randomUUID } from 'node:crypto';
 import { resolve } from 'node:path';
 import { ApiError, type Adapter, type Order, type TrustedQuote } from './types.js';
 import { OrderLedger } from './ledger.js';
+import { isIngredientId, MAX_HELD, resolveRecipe } from '../src/game/data.js';
+import { matchCooking } from './cooking.js';
+import { automaticMenu } from './automatic-menu.js';
 
-export interface AppOptions { adapter: Adapter; ledgerPath?: string; staticDirectory?: string; now?: () => number; quoteTtlMs?: number }
+export interface AppOptions { adapter: Adapter; ledgerPath?: string; staticDirectory?: string; now?: () => number; quoteTtlMs?: number; storeSearch?: { city: string; keyword: string } }
 export async function createApp(options: AppOptions) {
   const { adapter } = options;
   const now = options.now ?? Date.now;
   const quoteTtlMs = options.quoteTtlMs ?? 5 * 60 * 1000;
+  const autoMatch = automaticMenu(adapter, options.storeSearch ?? { city: '上海', keyword: '人民广场' }, now);
   const quotes = new Map<string, TrustedQuote>();
   const pending = new Map<string, Promise<Order>>();
   const ledger = new OrderLedger(options.ledgerPath);
@@ -38,6 +42,16 @@ export async function createApp(options: AppOptions) {
   app.get('/api/catalog', route(async (req, res) => {
     const storeCode = req.query.storeCode === undefined ? '' : inputString(req.query.storeCode, '门店编码');
     res.json(await adapter.catalog(storeCode));
+  }));
+  app.post('/api/cooking-match', route(async (req, res) => {
+    const storeCode = req.body?.storeCode === undefined ? undefined : inputString(req.body.storeCode, '门店编码');
+    const ingredients: unknown = req.body?.ingredients;
+    if (!Array.isArray(ingredients) || ingredients.length < 1 || ingredients.length > MAX_HELD || !ingredients.every(isIngredientId)) {
+      throw new ApiError(400, '请投入 1 至 5 份有效食材。', 'INVALID_INGREDIENTS');
+    }
+    try { resolveRecipe(ingredients); }
+    catch (error) { throw new ApiError(400, (error as Error).message, 'MISSING_MAIN_INGREDIENT'); }
+    res.json(storeCode ? matchCooking(ingredients, await adapter.catalog(storeCode)) : await autoMatch(ingredients));
   }));
   app.post('/api/quote', route(async (req, res) => {
     const productId = inputString(req.body?.productId, '餐品编码');

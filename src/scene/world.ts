@@ -11,6 +11,7 @@ export const PICKUPS: Pickup[] = [
   {id:'fish-crate',ingredient:'fish',x:2.8,z:-8.5},
   {id:'pickle-jar',ingredient:'pickle',x:-3.5,z:-8.5},
   {id:'chili-plant',ingredient:'chili',x:-10,z:4.5},
+  {id:'roast-sauce-jar',ingredient:'roast-sauce',x:7,z:3.2},
   {id:'fries-crate',ingredient:'fries',x:9,z:6},
 ];
 export const TREES = [
