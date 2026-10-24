@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "stores": { "name": "query-nearby-stores", "arguments": { "searchType": 2, "beType": 1, "city": { "$ref": "city" }, "keyword": { "$ref": "keyword" } } },
+  "catalog": {
+    "name": "query-meals",
+    "arguments": { "storeCode": { "$ref": "storeCode" }, "orderType": 1, "beType": 1 },
+    "productsPath": "data.meals", "idPath": "code", "namePath": "name", "pricePath": "currentPrice", "priceScale": 1
+  },
+  "detail": {
+    "name": "query-meal-detail",
+    "arguments": { "storeCode": { "$ref": "storeCode" }, "orderType": 1, "beType": 1, "code": { "$ref": "productId" } }
+  },
+  "quote": {
+    "name": "calculate-price",
+    "arguments": { "storeCode": { "$ref": "storeCode" }, "orderType": 1, "beType": 1, "items": { "$ref": "items" } },
+    "totalPath": "data.price", "priceScale": 0.01, "takeWaysPath": "data.takeWayList"
+  },
+  "createOrder": {
+    "name": "create-order",
+    "arguments": { "storeCode": { "$ref": "storeCode" }, "orderType": 1, "beType": 1, "items": { "$ref": "items" }, "takeWayCode": { "$ref": "takeWayCode" } },
+    "orderIdPath": "data.orderId", "payUrlPath": "data.payH5Url"
+  },
+  "catalogTags": {
+    "511782": "cheeseburger", "1120": "double-beef", "1406": "chicken", "1600": "fish", "1440": "spicy-chicken", "4810": "fries"
+  }
+}
