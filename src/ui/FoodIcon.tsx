@@ -1,9 +1,12 @@
 import { useId } from 'react';
 import type { IngredientId, Recipe } from '../game/data';
+import { useFoodThumbnail } from './foodThumbnails';
 
-/** Original vector illustrations, shared by the inventory and recipe book. */
+/** Model renders are shared by every UI; vectors cover the brief initial bake. */
 export function FoodIcon({ id, size = 96 }: { id: IngredientId; size?: number }) {
   const uid = useId().replaceAll(':', '');
+  const thumbnail = useFoodThumbnail(id);
+  if (thumbnail) return <img src={thumbnail} width={size} height={size} alt="" draggable={false} className="food-icon food-thumbnail"/>;
   return (
     <svg width={size} height={size} viewBox="0 0 120 120" fill="none" aria-hidden="true" className="food-icon">
       <defs><linearGradient id={`bread-${uid}`} x1="35" y1="25" x2="78" y2="93" gradientUnits="userSpaceOnUse"><stop stopColor="#ffe6a6"/><stop offset="1" stopColor="#cc7f38"/></linearGradient></defs>

@@ -9,13 +9,14 @@ import { Adventurer, type TravelerMotion } from './Adventurer';
 import { CookingPot } from './CookingPot';
 import { Environment, Crate } from './Environment';
 import { FoodModel } from './FoodModels';
+import { IngredientThumbnails } from './IngredientThumbnails';
 
 export const isEditing = (target: EventTarget | null) => target instanceof HTMLElement && Boolean(target.closest('input, select, textarea, button, a, [contenteditable="true"]'));
 
 function useKeys(){
   const keys=useRef(new Set<string>());
   useEffect(()=>{
-    const down=(e:KeyboardEvent)=>{const s=useGameStore.getState();if(isEditing(e.target)||s.phase!=='explore'||s.panel)return;keys.current.add(e.key.toLowerCase());if(['w','a','s','d','Tab',' '].includes(e.key))e.preventDefault()};
+    const down=(e:KeyboardEvent)=>{const s=useGameStore.getState();if(isEditing(e.target)||s.phase!=='explore'||s.panel)return;keys.current.add(e.key.toLowerCase());if(['w','a','s','d',' '].includes(e.key))e.preventDefault()};
     const up=(e:KeyboardEvent)=>keys.current.delete(e.key.toLowerCase());
     const clear=()=>keys.current.clear();
     const move=(e:Event)=>{const d=(e as CustomEvent<{key:string;pressed:boolean}>).detail;if(d.pressed)keys.current.add(d.key);else keys.current.delete(d.key)};
@@ -119,5 +120,5 @@ function Scene({onNear}:{onNear:(near:Nearby)=>void}){
 }
 
 export function GameCanvas({onNear}:{onNear:(near:Nearby)=>void}){
-  return <Canvas shadows dpr={[1,1.7]} camera={{position:[7,3.8,6.5],fov:48,near:.1,far:350}} gl={{antialias:true,powerPreference:'high-performance',toneMapping:THREE.ACESFilmicToneMapping,toneMappingExposure:1.1}}><Scene onNear={onNear}/></Canvas>;
+  return <Canvas shadows dpr={[1,1.7]} camera={{position:[7,3.8,6.5],fov:48,near:.1,far:350}} gl={{antialias:true,powerPreference:'high-performance',toneMapping:THREE.ACESFilmicToneMapping,toneMappingExposure:1.1}}><IngredientThumbnails/><Scene onNear={onNear}/></Canvas>;
 }

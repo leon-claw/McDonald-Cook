@@ -12,3 +12,8 @@ output/
 # Downloaded source audio library; runtime samples are tracked in selected/.
 resource/sound/botw_music/
 resource/sound/botw_sfx/
+
+# Graphify output is rebuilt locally; the generated hook contains a local CLI path.
+graphify-out/
+.codex/hooks.json
+.codex/hooks.json.bak*

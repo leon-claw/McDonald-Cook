@@ -1,0 +1,19 @@
+# Source code and project documentation are useful; generated files and assets are not.
+node_modules/
+dist/
+output/
+.git/
+.codex/
+.agents/
+.playwright-cli/
+graphify-out/
+resource/
+public/
+docs/research/
+package-lock.json
+*.log
+
+# Local credentials and order data must never enter the graph.
+.env
+.env.*
+server/data/
