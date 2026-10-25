@@ -1,4 +1,21 @@
-# Visual direction — October 24, 2026
+# Visual direction — updated October 25, 2026
+
+## Current goal: presentation-first visual quality
+
+The project is primarily for a demonstration. The user's explicit priority is visual impact, with less effort spent on interaction details. This section supersedes earlier priorities where they conflict.
+
+Priority: rendered visual quality > a stable demonstration path > interaction polish and edge cases. Preserve a usable exploration → inventory → cooking → reveal path. Spend the next iterations on visible improvements rather than expanding controls, mobile support, physics, or gameplay systems unless required for the demonstration.
+
+Visual targets, in order:
+
+1. Character: a convincing silhouette and head-to-body ratio informed by Link references, then coherent hair masses, layered clothing and readable equipment. Refine facial shape, eyes and material response after the overall form works. Avoid using small accessories as a substitute for improving the main forms.
+2. Environment: compose a strong opening view with foreground, middle ground and distant terrain; improve vegetation silhouettes, ground variation, atmospheric depth and sunlight/shadow balance toward the Breath of the Wild visual direction.
+3. Cooking and food: make the pot, fire, steam and finished food attractive in close views; align composition, lighting and material detail with the presentation camera.
+4. Interface: keep the world and character visible, with restrained overlays and readable presentation framing.
+
+Acceptance is based on actual rendered views: character front/side/back, the opening camp view, the inventory character view, and cooking/reveal close-ups. Review screenshots or a short demonstration at the intended presentation resolution. A successful typecheck or build is a technical prerequisite, not proof of visual quality. No fixed frame-rate or visual similarity result has been verified for this new pass.
+
+## Existing visual foundation
 
 The user wants the visual language and cooking experience of Breath of the Wild. The playable 3D world must carry the design. This pass replaces the miniature, geometric prototype with a sunlit, windswept valley, a normally proportioned blue-tunic traveler, layered vegetation and a complete iron cooking pot.
 

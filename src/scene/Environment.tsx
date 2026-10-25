@@ -257,6 +257,45 @@ function CampProps(){
   </>;
 }
 
+/** Broad foliage and weathered stones frame the camp without filling its main sightline. */
+function CampBorders(){
+  const foliage=useRef<THREE.InstancedMesh>(null),stones=useRef<THREE.InstancedMesh>(null);
+  const geometry=useMemo(()=>{
+    const g=new THREE.IcosahedronGeometry(1,1),p=g.attributes.position;
+    for(let i=0;i<p.count;i++){
+      const x=p.getX(i),y=p.getY(i),z=p.getZ(i);
+      const erosion=1+Math.sin(x*7+z*5)*.09+Math.cos(y*8-x*3)*.06;
+      p.setXYZ(i,x*erosion,y*erosion,z*erosion);
+    }
+    g.computeVertexNormals();return g;
+  },[]);
+  useEffect(()=>()=>geometry.dispose(),[geometry]);
+  useEffect(()=>{
+    if(!foliage.current||!stones.current)return;
+    const d=new THREE.Object3D();
+    for(let i=0;i<96;i++){
+      const angle=random(i*13+71)*Math.PI*2,r=11+random(i*13+72)*16;
+      const x=Math.cos(angle)*r,z=Math.sin(angle)*r-4;
+      const s=.42+random(i*13+73)*.7;
+      d.position.set(x,heightAt(x,z)+s*.25,z);d.rotation.set(.1,angle,.08);
+      d.scale.set(s*1.35,s*.65,s);d.updateMatrix();foliage.current.setMatrixAt(i,d.matrix);
+      foliage.current.setColorAt(i,new THREE.Color(['#466a37','#657e3b','#82994b','#547843'][i%4]));
+    }
+    const placements=[[-10,7,1.5],[-12,6,1.0],[11,4,1.2],[13,3,1.9],[-8,-12,1.2],[15,-10,2.1],[-16,-6,2.5],[18,11,2.0]];
+    placements.forEach(([x,z,s],i)=>{
+      d.position.set(x,heightAt(x,z)+s*.3,z);d.rotation.set(.12,i*1.7,-.1);
+      d.scale.set(s,s*.7,s*.8);d.updateMatrix();stones.current!.setMatrixAt(i,d.matrix);
+      stones.current!.setColorAt(i,new THREE.Color(i%2?'#8c9780':'#788572'));
+    });
+    for(const mesh of [foliage.current,stones.current]){
+      mesh.instanceMatrix.needsUpdate=true;if(mesh.instanceColor)mesh.instanceColor.needsUpdate=true;
+      mesh.computeBoundingSphere();
+    }
+  },[]);
+  return <><instancedMesh ref={foliage} args={[undefined,undefined,96]} castShadow receiveShadow><icosahedronGeometry args={[1,1]}/><meshToonMaterial gradientMap={toonRamp}/></instancedMesh>
+    <instancedMesh ref={stones} args={[geometry,undefined,8]} castShadow receiveShadow><meshStandardMaterial roughness={.95} flatShading/></instancedMesh></>;
+}
+
 function Birds(){
   const ref=useRef<THREE.Group>(null);
   useFrame(({clock})=>{if(ref.current){ref.current.position.x=Math.sin(clock.elapsedTime*.025)*20;ref.current.rotation.y=clock.elapsedTime*.012;}});
@@ -266,11 +305,12 @@ function Birds(){
 export function Environment(){
   return <>
     <color attach="background" args={['#bfd6cd']}/><fog attach="fog" args={['#bfd6cd',38,135]}/>
-    <ambientLight intensity={.3} color="#e3ecda"/>
-    <hemisphereLight intensity={1.35} color="#c4e0ed" groundColor="#78834c"/>
+    <ambientLight intensity={.22} color="#e3ecda"/>
+    <hemisphereLight intensity={1.1} color="#c4e0ed" groundColor="#69764c"/>
+    <directionalLight position={[9,10,-14]} intensity={.65} color="#b9deed"/>
     <directionalLight position={[-18,27,12]} intensity={2.8} color="#fff1cd" castShadow shadow-mapSize={[2048,2048]} shadow-camera-left={-24} shadow-camera-right={24} shadow-camera-top={24} shadow-camera-bottom={-24} shadow-camera-near={1} shadow-camera-far={75} shadow-bias={-.00035} shadow-normalBias={.035} shadow-radius={3}/>
     <SkyDome/>
     <Ridge distance={130} height={56} color="#93b0b4" seed={3}/><Ridge distance={105} height={39} color="#78999e" seed={6}/><Ridge distance={80} height={23} color="#718d85" seed={2}/>
-    <Terrain/><Grass/><Woodland/><StonesAndFlowers/><CampProps/><Birds/>
+    <Terrain/><Grass/><Woodland/><CampBorders/><StonesAndFlowers/><CampProps/><Birds/>
   </>;
 }

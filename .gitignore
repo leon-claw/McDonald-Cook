@@ -17,3 +17,6 @@ resource/sound/botw_sfx/
 graphify-out/
 .codex/hooks.json
 .codex/hooks.json.bak*
+
+# Local agent workspace (session notes and memory), not part of the game source.
+.workbuddy/

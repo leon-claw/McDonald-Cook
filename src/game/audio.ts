@@ -41,6 +41,16 @@ const buffers = new Map<string, Promise<AudioBuffer | null>>();
 const revisions: Record<Channel, number> = { ui: 0, pickup: 0, voice: 0, cooking: 0, result: 0 };
 const lastVariant = new Map<readonly string[], number>();
 
+// Ambient music runs on its own looping layer outside the SFX channel system,
+// so gameplay stop()/stopAllSounds() calls never cut the music.
+const bgmTrack = new URL('../../resource/sound/selected/BGM_TheGreatPlateau.mp3', import.meta.url).href;
+const BGM_VOLUME = 0.5;
+const BGM_FADE_SECONDS = 0.6;
+let bgmHidden = false;
+let bgmSource: AudioBufferSourceNode | null = null;
+let bgmGain: GainNode | null = null;
+let bgmPending: Promise<void> | null = null;
+
 function loadSample(url: string): Promise<AudioBuffer | null> {
   const context = audioContext;
   if (!context) return Promise.resolve(null);
@@ -68,17 +78,85 @@ export function initAudio(): void {
       master = audioContext.createGain();
       master.gain.value = 0.42;
       master.connect(audioContext.destination);
-      document.addEventListener('visibilitychange', () => { if (document.hidden) stopAllSounds(); });
+      document.addEventListener('visibilitychange', () => {
+        bgmHidden = document.hidden;
+        if (document.hidden) stopAllSounds();
+        syncBgm();
+      });
       window.addEventListener('pagehide', stopAllSounds);
     }
-    if (audioContext.state === 'suspended') void audioContext.resume().catch(() => undefined);
+    if (audioContext.state === 'suspended') {
+      void audioContext.resume().then(() => syncBgm()).catch(() => undefined);
+    }
     if (!preloaded) {
       preloaded = true;
       Object.values(samples).flat().forEach(url => { void loadSample(url); });
     }
+    syncBgm();
   } catch {
     // Audio-device and autoplay failures must never interrupt gameplay.
   }
+}
+
+function rampBgm(context: AudioContext, target: number, timeConstant: number): void {
+  if (!bgmGain) return;
+  try {
+    const now = context.currentTime;
+    bgmGain.gain.cancelScheduledValues(now);
+    bgmGain.gain.setValueAtTime(bgmGain.gain.value, now);
+    bgmGain.gain.setTargetAtTime(target, now, timeConstant / 3);
+  } catch { /* A closed context must not interrupt the caller. */ }
+}
+
+function startBgm(context: AudioContext): void {
+  if (bgmSource || bgmPending) return;
+  bgmPending = loadSample(bgmTrack)
+    .then(buffer => {
+      bgmPending = null;
+      // Conditions may have changed while the 4 MB track was decoding.
+      if (!buffer || bgmSource || !audioContext || !master || audioContext !== context) return;
+      if (!enabled || bgmHidden || context.state !== 'running') return;
+      try {
+        const source = context.createBufferSource();
+        const gain = context.createGain();
+        source.buffer = buffer;
+        source.loop = true;
+        gain.gain.value = 0;
+        source.connect(gain);
+        gain.connect(master);
+        source.onended = () => {
+          if (bgmSource === source) { bgmSource = null; bgmGain = null; }
+          try { source.disconnect(); gain.disconnect(); } catch { /* Already torn down. */ }
+        };
+        bgmSource = source;
+        bgmGain = gain;
+        source.start();
+        rampBgm(context, BGM_VOLUME, BGM_FADE_SECONDS);
+      } catch { /* Autoplay or device failures must never break gameplay. */ }
+    })
+    .catch(() => { bgmPending = null; });
+}
+
+/** Fade the music toward its desired state: on when sound is enabled and the tab is visible. */
+function syncBgm(): void {
+  const context = audioContext;
+  if (!context || !master) return;
+  if (!enabled || bgmHidden) {
+    // Fade out but keep the looping source alive at zero gain for a seamless resume.
+    rampBgm(context, 0, 0.35);
+    return;
+  }
+  if (context.state === 'suspended') {
+    // Auto-resume on tab focus; safe because the context was created from a user gesture.
+    void context.resume().then(() => syncBgm()).catch(() => undefined);
+    return;
+  }
+  if (context.state !== 'running') return;
+  if (bgmGain) {
+    rampBgm(context, BGM_VOLUME, BGM_FADE_SECONDS);
+    return;
+  }
+  startBgm(context);
 }
 
 function stopChannel(channel: Channel): number {
@@ -105,6 +183,7 @@ export function setAudioEnabled(value: boolean): void {
   enabled = value;
   if (master && audioContext) master.gain.setTargetAtTime(value ? 0.42 : 0, audioContext.currentTime, 0.015);
   if (!value) stopAllSounds();
+  syncBgm();
 }
 
 function track(source: AudioScheduledSourceNode, gain: GainNode, channel: Channel): void {

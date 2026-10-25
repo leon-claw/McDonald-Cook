@@ -81,7 +81,9 @@ function Scene({onNear}:{onNear:(near:Nearby)=>void}){
     const py=heightAt(m.x,m.z);
     let fov=mobile?57:48;
     if(state.phase==='title'){
-      vectors.position.set(7+Math.sin(clock.elapsedTime*.06)*.7,3.8,6.5);vectors.target.set(-.6,1.25,-4);
+      const a=.645+clock.elapsedTime*.05,r=8+Math.sin(clock.elapsedTime*.07)*.35;
+      vectors.position.set(Math.sin(a)*r,3.45+Math.sin(clock.elapsedTime*.13)*.55,Math.cos(a)*r-2.8);
+      vectors.target.set(Math.sin(clock.elapsedTime*.085)*.4,1.05+Math.sin(clock.elapsedTime*.067)*.12,-2.6);
     }else if(state.phase==='cooking'){
       const t=Math.min(COOK_DURATION,(performance.now()-state.cookingStartedAt)/1000);
       vectors.position.set(3.9-t*.065,2.65,-.35-t*.035);vectors.target.set(-.25,t>4.2?1.65:1.18,-3.85);fov=mobile?54:43;
@@ -120,5 +122,5 @@ function Scene({onNear}:{onNear:(near:Nearby)=>void}){
 }
 
 export function GameCanvas({onNear}:{onNear:(near:Nearby)=>void}){
-  return <Canvas shadows dpr={[1,1.7]} camera={{position:[7,3.8,6.5],fov:48,near:.1,far:350}} gl={{antialias:true,powerPreference:'high-performance',toneMapping:THREE.ACESFilmicToneMapping,toneMappingExposure:1.1}}><IngredientThumbnails/><Scene onNear={onNear}/></Canvas>;
+  return <Canvas shadows dpr={[1,1.7]} camera={{position:[4.8,3.45,3.6],fov:48,near:.1,far:350}} gl={{antialias:true,powerPreference:'high-performance',toneMapping:THREE.ACESFilmicToneMapping,toneMappingExposure:1.1}}><IngredientThumbnails/><Scene onNear={onNear}/></Canvas>;
 }
